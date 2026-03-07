@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import React, { useEffect } from "react";
 import {
   View,
   Text,
@@ -6,12 +6,10 @@ import {
   ScrollView,
   Pressable,
   Platform,
-  Dimensions,
 } from "react-native";
 import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { LinearGradient } from "expo-linear-gradient";
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { Ionicons, Feather } from "@expo/vector-icons";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -20,37 +18,28 @@ import Animated, {
   withSpring,
   withRepeat,
   withSequence,
-  interpolate,
   Easing,
 } from "react-native-reanimated";
 import { useTheme } from "@/contexts/ThemeContext";
-import Colors from "@/constants/colors";
-
-const { width } = Dimensions.get("window");
 
 function FeatureCard({
   icon,
   title,
   description,
   delay,
-  iconBg,
 }: {
   icon: React.ReactNode;
   title: string;
   description: string;
   delay: number;
-  iconBg: string;
 }) {
-  const { colors, isDark } = useTheme();
+  const { colors } = useTheme();
   const opacity = useSharedValue(0);
-  const translateY = useSharedValue(30);
+  const translateY = useSharedValue(24);
 
   useEffect(() => {
-    opacity.value = withDelay(delay, withTiming(1, { duration: 600 }));
-    translateY.value = withDelay(
-      delay,
-      withSpring(0, { damping: 20, stiffness: 90 })
-    );
+    opacity.value = withDelay(delay, withTiming(1, { duration: 500 }));
+    translateY.value = withDelay(delay, withSpring(0, { damping: 22, stiffness: 100 }));
   }, []);
 
   const animStyle = useAnimatedStyle(() => ({
@@ -63,30 +52,17 @@ function FeatureCard({
       style={[
         animStyle,
         styles.featureCard,
-        {
-          backgroundColor: colors.card,
-          borderColor: colors.cardBorder,
-        },
+        { backgroundColor: colors.card, borderColor: colors.cardBorder },
       ]}
     >
-      <View style={[styles.featureIconWrap, { backgroundColor: iconBg }]}>
+      <View style={[styles.featureIconWrap, { backgroundColor: colors.surface, borderColor: colors.cardBorder }]}>
         {icon}
       </View>
       <View style={styles.featureTextWrap}>
-        <Text
-          style={[
-            styles.featureTitle,
-            { color: colors.text, fontFamily: "Inter_600SemiBold" },
-          ]}
-        >
+        <Text style={[styles.featureTitle, { color: colors.text, fontFamily: "Satoshi-Bold" }]}>
           {title}
         </Text>
-        <Text
-          style={[
-            styles.featureDesc,
-            { color: colors.textSecondary, fontFamily: "Inter_400Regular" },
-          ]}
-        >
+        <Text style={[styles.featureDesc, { color: colors.textSecondary, fontFamily: "Satoshi-Regular" }]}>
           {description}
         </Text>
       </View>
@@ -94,22 +70,14 @@ function FeatureCard({
   );
 }
 
-function StatBadge({
-  value,
-  label,
-  delay,
-}: {
-  value: string;
-  label: string;
-  delay: number;
-}) {
-  const { colors } = useTheme();
-  const scale = useSharedValue(0.8);
+function StatBadge({ value, label, delay }: { value: string; label: string; delay: number }) {
+  const { colors, isDark } = useTheme();
+  const scale = useSharedValue(0.85);
   const opacity = useSharedValue(0);
 
   useEffect(() => {
-    opacity.value = withDelay(delay, withTiming(1, { duration: 500 }));
-    scale.value = withDelay(delay, withSpring(1, { damping: 15 }));
+    opacity.value = withDelay(delay, withTiming(1, { duration: 400 }));
+    scale.value = withDelay(delay, withSpring(1, { damping: 18 }));
   }, []);
 
   const animStyle = useAnimatedStyle(() => ({
@@ -118,27 +86,11 @@ function StatBadge({
   }));
 
   return (
-    <Animated.View
-      style={[
-        animStyle,
-        styles.statBadge,
-        { backgroundColor: colors.surface, borderColor: colors.cardBorder },
-      ]}
-    >
-      <Text
-        style={[
-          styles.statValue,
-          { color: Colors.primary, fontFamily: "Inter_700Bold" },
-        ]}
-      >
+    <Animated.View style={[animStyle, styles.statBadge, { backgroundColor: colors.surface, borderColor: colors.cardBorder }]}>
+      <Text style={[styles.statValue, { color: colors.highlight, fontFamily: "Satoshi-Black" }]}>
         {value}
       </Text>
-      <Text
-        style={[
-          styles.statLabel,
-          { color: colors.textSecondary, fontFamily: "Inter_400Regular" },
-        ]}
-      >
+      <Text style={[styles.statLabel, { color: colors.textSecondary, fontFamily: "Satoshi-Regular" }]}>
         {label}
       </Text>
     </Animated.View>
@@ -150,17 +102,17 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
 
   const heroOpacity = useSharedValue(0);
-  const heroTranslateY = useSharedValue(40);
+  const heroTranslateY = useSharedValue(32);
   const buttonScale = useSharedValue(1);
-  const glowPulse = useSharedValue(0.6);
+  const glowPulse = useSharedValue(0.4);
 
   useEffect(() => {
-    heroOpacity.value = withTiming(1, { duration: 800 });
-    heroTranslateY.value = withSpring(0, { damping: 20, stiffness: 80 });
+    heroOpacity.value = withTiming(1, { duration: 700 });
+    heroTranslateY.value = withSpring(0, { damping: 22, stiffness: 80 });
     glowPulse.value = withRepeat(
       withSequence(
-        withTiming(1, { duration: 1800, easing: Easing.inOut(Easing.ease) }),
-        withTiming(0.6, { duration: 1800, easing: Easing.inOut(Easing.ease) })
+        withTiming(0.8, { duration: 2000, easing: Easing.inOut(Easing.ease) }),
+        withTiming(0.4, { duration: 2000, easing: Easing.inOut(Easing.ease) })
       ),
       -1,
       false
@@ -172,29 +124,22 @@ export default function HomeScreen() {
     transform: [{ translateY: heroTranslateY.value }],
   }));
 
-  const glowStyle = useAnimatedStyle(() => ({
-    opacity: glowPulse.value,
-  }));
-
-  const btnStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: buttonScale.value }],
-  }));
+  const glowStyle = useAnimatedStyle(() => ({ opacity: glowPulse.value }));
+  const btnStyle = useAnimatedStyle(() => ({ transform: [{ scale: buttonScale.value }] }));
 
   const handleGetStarted = () => {
     buttonScale.value = withSequence(
-      withTiming(0.96, { duration: 80 }),
-      withSpring(1, { damping: 15 })
+      withTiming(0.96, { duration: 70 }),
+      withSpring(1, { damping: 14 })
     );
-    setTimeout(() => router.push("/(tabs)"), 120);
+    setTimeout(() => router.push("/(tabs)"), 100);
   };
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 : insets.bottom;
 
   return (
-    <View
-      style={[styles.container, { backgroundColor: colors.background }]}
-    >
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={[
@@ -202,98 +147,68 @@ export default function HomeScreen() {
           { paddingTop: topPad + 16, paddingBottom: bottomPad + 40 },
         ]}
       >
-        {/* Header Row */}
+        {/* Header */}
         <View style={styles.headerRow}>
           <View style={styles.logoRow}>
-            <View style={styles.logoIcon}>
-              <Ionicons name="lock-closed" size={16} color="#FFFFFF" />
+            <View style={[styles.logoIcon, { backgroundColor: colors.text }]}>
+              <Feather name="lock" size={14} color={colors.background} />
             </View>
-            <Text
-              style={[
-                styles.logoText,
-                { color: colors.text, fontFamily: "Inter_700Bold" },
-              ]}
-            >
-              Lock In
+            <Text style={[styles.logoText, { color: colors.text, fontFamily: "Satoshi-Black" }]}>
+              lock in
             </Text>
           </View>
           <Pressable
             onPress={toggleTheme}
-            style={[
-              styles.themeToggle,
-              {
-                backgroundColor: colors.surface,
-                borderColor: colors.cardBorder,
-              },
-            ]}
+            style={[styles.themeToggle, { backgroundColor: colors.surface, borderColor: colors.cardBorder }]}
           >
             <Ionicons
-              name={isDark ? "sunny" : "moon"}
+              name={isDark ? "sunny-outline" : "moon-outline"}
               size={18}
-              color={isDark ? "#F59E0B" : "#6366F1"}
+              color={colors.textSecondary}
             />
           </Pressable>
         </View>
 
         {/* Hero Section */}
         <Animated.View style={[styles.heroSection, heroStyle]}>
-          {/* Glow effect */}
-          <Animated.View style={[styles.glowBehind, glowStyle]} />
+          <Animated.View
+            style={[
+              styles.glowBehind,
+              glowStyle,
+              { backgroundColor: isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.04)" },
+            ]}
+          />
 
-          <View style={styles.heroBadge}>
-            <Ionicons name="sparkles" size={12} color={Colors.accent} />
-            <Text
-              style={[
-                styles.heroBadgeText,
-                { color: Colors.accent, fontFamily: "Inter_600SemiBold" },
-              ]}
-            >
+          <View style={[styles.heroBadge, { backgroundColor: colors.surface, borderColor: colors.cardBorder }]}>
+            <View style={[styles.heroBadgeDot, { backgroundColor: isDark ? "#FFFFFF" : "#111111" }]} />
+            <Text style={[styles.heroBadgeText, { color: colors.textSecondary, fontFamily: "Satoshi-Medium" }]}>
               AI-Powered Study Planner
             </Text>
           </View>
 
-          <Text
-            style={[
-              styles.heroTitle,
-              { color: colors.text, fontFamily: "Inter_700Bold" },
-            ]}
-          >
+          <Text style={[styles.heroTitle, { color: colors.text, fontFamily: "Satoshi-Black" }]}>
             {"Study Smarter,\nNot Harder"}
           </Text>
 
-          <Text
-            style={[
-              styles.heroSubtitle,
-              { color: colors.textSecondary, fontFamily: "Inter_400Regular" },
-            ]}
-          >
-            Lock In creates personalized AI study plans tailored to your goals,
-            schedule, and learning style.
+          <Text style={[styles.heroSubtitle, { color: colors.textSecondary, fontFamily: "Satoshi-Regular" }]}>
+            Lock In creates personalized AI study plans tailored to your goals, schedule, and learning style.
           </Text>
 
-          {/* CTA Button */}
           <Animated.View style={btnStyle}>
-            <Pressable onPress={handleGetStarted}>
-              <LinearGradient
-                colors={["#14B8A6", "#0D9488"]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.ctaButton}
-              >
-                <Text
-                  style={[
-                    styles.ctaText,
-                    { fontFamily: "Inter_700Bold" },
-                  ]}
-                >
-                  Get Started
-                </Text>
-                <Ionicons name="arrow-forward" size={20} color="#FFFFFF" />
-              </LinearGradient>
+            <Pressable
+              onPress={handleGetStarted}
+              style={[
+                styles.ctaButton,
+                { backgroundColor: colors.text },
+              ]}
+            >
+              <Text style={[styles.ctaText, { color: colors.background, fontFamily: "Satoshi-Bold" }]}>
+                Get Started
+              </Text>
+              <Feather name="arrow-right" size={18} color={colors.background} />
             </Pressable>
           </Animated.View>
 
-          {/* Stats Row */}
           <View style={styles.statsRow}>
             <StatBadge value="10K+" label="Students" delay={400} />
             <StatBadge value="95%" label="Success Rate" delay={550} />
@@ -301,211 +216,105 @@ export default function HomeScreen() {
           </View>
         </Animated.View>
 
-        {/* Feature Preview Card */}
-        <View
-          style={[
-            styles.previewCard,
-            { backgroundColor: colors.card, borderColor: colors.cardBorder },
-          ]}
-        >
-          <LinearGradient
-            colors={
-              isDark
-                ? ["rgba(20,184,166,0.15)", "rgba(20,184,166,0)"]
-                : ["rgba(20,184,166,0.08)", "rgba(20,184,166,0)"]
-            }
-            style={styles.previewGradient}
-          >
-            <View style={styles.previewHeader}>
-              <Text
-                style={[
-                  styles.previewDay,
-                  {
-                    color: Colors.primary,
-                    fontFamily: "Inter_600SemiBold",
-                  },
-                ]}
-              >
-                Today's Plan
+        {/* Preview Card */}
+        <View style={[styles.previewCard, { backgroundColor: colors.card, borderColor: colors.cardBorder }]}>
+          <View style={styles.previewHeader}>
+            <Text style={[styles.previewDay, { color: colors.text, fontFamily: "Satoshi-Bold" }]}>
+              Today's Plan
+            </Text>
+            <View style={[styles.previewBadge, { backgroundColor: colors.surface, borderColor: colors.cardBorder }]}>
+              <View style={[styles.activeDot, { backgroundColor: isDark ? "#FFFFFF" : "#111111" }]} />
+              <Text style={[styles.previewBadgeText, { color: colors.textSecondary, fontFamily: "Satoshi-Medium" }]}>
+                3 sessions
               </Text>
-              <View style={styles.previewBadge}>
-                <View style={styles.activeDot} />
-                <Text
-                  style={[
-                    styles.previewBadgeText,
-                    {
-                      color: Colors.primary,
-                      fontFamily: "Inter_500Medium",
-                    },
-                  ]}
-                >
-                  3 sessions
+            </View>
+          </View>
+
+          {[
+            { subject: "Mathematics", time: "09:00 AM", duration: "1h 30m", done: true },
+            { subject: "Physics", time: "11:00 AM", duration: "1h 00m", done: false },
+            { subject: "Literature", time: "02:00 PM", duration: "45m", done: false },
+          ].map((item, idx) => (
+            <View
+              key={idx}
+              style={[styles.previewItem, { backgroundColor: colors.surface, borderColor: colors.cardBorder }]}
+            >
+              <View style={[
+                styles.previewCheck,
+                {
+                  backgroundColor: item.done ? colors.text : "transparent",
+                  borderColor: item.done ? colors.text : colors.cardBorder,
+                }
+              ]}>
+                {item.done && <Feather name="check" size={10} color={colors.background} />}
+              </View>
+              <View style={styles.previewItemContent}>
+                <Text style={[
+                  styles.previewSubject,
+                  {
+                    color: item.done ? colors.textTertiary : colors.text,
+                    fontFamily: "Satoshi-Medium",
+                    textDecorationLine: item.done ? "line-through" : "none",
+                  }
+                ]}>
+                  {item.subject}
+                </Text>
+                <Text style={[styles.previewTime, { color: colors.textTertiary, fontFamily: "Satoshi-Regular" }]}>
+                  {item.time} · {item.duration}
                 </Text>
               </View>
             </View>
-
-            {[
-              { subject: "Mathematics", time: "09:00 AM", duration: "1h 30m", progress: 0.7 },
-              { subject: "Physics", time: "11:00 AM", duration: "1h 00m", progress: 0.3 },
-              { subject: "Literature", time: "02:00 PM", duration: "45m", progress: 0 },
-            ].map((item, idx) => (
-              <View
-                key={idx}
-                style={[
-                  styles.previewItem,
-                  {
-                    backgroundColor: colors.surface,
-                    borderColor: colors.cardBorder,
-                  },
-                ]}
-              >
-                <View
-                  style={[
-                    styles.previewDot,
-                    {
-                      backgroundColor:
-                        item.progress > 0 ? Colors.primary : colors.cardBorder,
-                    },
-                  ]}
-                />
-                <View style={styles.previewItemContent}>
-                  <Text
-                    style={[
-                      styles.previewSubject,
-                      { color: colors.text, fontFamily: "Inter_600SemiBold" },
-                    ]}
-                  >
-                    {item.subject}
-                  </Text>
-                  <Text
-                    style={[
-                      styles.previewTime,
-                      {
-                        color: colors.textSecondary,
-                        fontFamily: "Inter_400Regular",
-                      },
-                    ]}
-                  >
-                    {item.time} · {item.duration}
-                  </Text>
-                </View>
-                {item.progress > 0 && (
-                  <View
-                    style={[
-                      styles.progressPill,
-                      { backgroundColor: `rgba(20,184,166,0.15)` },
-                    ]}
-                  >
-                    <Text
-                      style={[
-                        styles.progressPillText,
-                        {
-                          color: Colors.primary,
-                          fontFamily: "Inter_600SemiBold",
-                        },
-                      ]}
-                    >
-                      {Math.round(item.progress * 100)}%
-                    </Text>
-                  </View>
-                )}
-              </View>
-            ))}
-          </LinearGradient>
+          ))}
         </View>
 
-        {/* Features Section */}
-        <Text
-          style={[
-            styles.sectionTitle,
-            { color: colors.text, fontFamily: "Inter_700Bold" },
-          ]}
-        >
+        {/* Features */}
+        <Text style={[styles.sectionTitle, { color: colors.text, fontFamily: "Satoshi-Black" }]}>
           Everything you need to excel
         </Text>
 
         <FeatureCard
-          icon={
-            <MaterialCommunityIcons name="brain" size={22} color="#FFFFFF" />
-          }
-          iconBg="#8B5CF6"
+          icon={<Feather name="cpu" size={18} color={colors.text} />}
           title="AI Study Plans"
-          description="Get a fully personalized study schedule generated by AI based on your goals and deadline."
+          description="Fully personalized study schedules generated by AI based on your goals and deadlines."
           delay={100}
         />
         <FeatureCard
-          icon={<Ionicons name="calendar-outline" size={22} color="#FFFFFF" />}
-          iconBg="#14B8A6"
+          icon={<Feather name="calendar" size={18} color={colors.text} />}
           title="Smart Scheduling"
-          description="Automatically balance study sessions with breaks and review cycles for maximum retention."
+          description="Balanced sessions with optimized breaks and spaced repetition for maximum retention."
           delay={200}
         />
         <FeatureCard
-          icon={
-            <Ionicons name="bar-chart-outline" size={22} color="#FFFFFF" />
-          }
-          iconBg="#F59E0B"
+          icon={<Feather name="bar-chart-2" size={18} color={colors.text} />}
           title="Progress Tracking"
-          description="Visual analytics to track your progress across subjects and keep you motivated."
+          description="Visual analytics to track your progress and keep you motivated across subjects."
           delay={300}
         />
         <FeatureCard
-          icon={<Ionicons name="flash-outline" size={22} color="#FFFFFF" />}
-          iconBg="#EF4444"
+          icon={<Feather name="zap" size={18} color={colors.text} />}
           title="Focus Mode"
           description="Distraction-free study sessions with Pomodoro timers and streak tracking."
           delay={400}
         />
 
         {/* Bottom CTA */}
-        <View
-          style={[
-            styles.bottomCta,
-            {
-              backgroundColor: isDark
-                ? "rgba(20,184,166,0.1)"
-                : "rgba(20,184,166,0.06)",
-              borderColor: isDark
-                ? "rgba(20,184,166,0.25)"
-                : "rgba(20,184,166,0.18)",
-            },
-          ]}
-        >
-          <Text
-            style={[
-              styles.bottomCtaTitle,
-              { color: colors.text, fontFamily: "Inter_700Bold" },
-            ]}
-          >
+        <View style={[
+          styles.bottomCta,
+          { backgroundColor: colors.card, borderColor: colors.cardBorder },
+        ]}>
+          <Text style={[styles.bottomCtaTitle, { color: colors.text, fontFamily: "Satoshi-Black" }]}>
             Ready to lock in?
           </Text>
-          <Text
-            style={[
-              styles.bottomCtaSubtitle,
-              {
-                color: colors.textSecondary,
-                fontFamily: "Inter_400Regular",
-              },
-            ]}
-          >
+          <Text style={[styles.bottomCtaSubtitle, { color: colors.textSecondary, fontFamily: "Satoshi-Regular" }]}>
             Start your AI-powered study journey today.
           </Text>
-          <Pressable onPress={handleGetStarted}>
-            <LinearGradient
-              colors={["#14B8A6", "#0D9488"]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.bottomCtaBtn}
-            >
-              <Text
-                style={[
-                  styles.bottomCtaBtnText,
-                  { fontFamily: "Inter_700Bold" },
-                ]}
-              >
-                Go to Dashboard
-              </Text>
-            </LinearGradient>
+          <Pressable
+            onPress={handleGetStarted}
+            style={[styles.bottomCtaBtn, { backgroundColor: colors.text }]}
+          >
+            <Text style={[styles.bottomCtaBtnText, { color: colors.background, fontFamily: "Satoshi-Bold" }]}>
+              Go to Dashboard
+            </Text>
           </Pressable>
         </View>
       </ScrollView>
@@ -514,35 +323,23 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingHorizontal: 20,
-  },
+  container: { flex: 1 },
+  scrollContent: { paddingHorizontal: 22 },
   headerRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 32,
+    marginBottom: 36,
   },
-  logoRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  },
+  logoRow: { flexDirection: "row", alignItems: "center", gap: 10 },
   logoIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 9,
-    backgroundColor: "#14B8A6",
+    width: 30,
+    height: 30,
+    borderRadius: 8,
     alignItems: "center",
     justifyContent: "center",
   },
-  logoText: {
-    fontSize: 20,
-    letterSpacing: -0.5,
-  },
+  logoText: { fontSize: 20, letterSpacing: -0.5 },
   themeToggle: {
     width: 40,
     height: 40,
@@ -551,205 +348,136 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     borderWidth: 1,
   },
-  heroSection: {
-    alignItems: "center",
-    marginBottom: 32,
-    position: "relative",
-  },
+  heroSection: { alignItems: "center", marginBottom: 36, position: "relative" },
   glowBehind: {
     position: "absolute",
-    width: 260,
-    height: 260,
-    borderRadius: 130,
-    backgroundColor: "rgba(20,184,166,0.15)",
-    top: -30,
+    width: 280,
+    height: 280,
+    borderRadius: 140,
+    top: -40,
   },
   heroBadge: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
-    backgroundColor: "rgba(20,184,166,0.12)",
+    gap: 8,
     paddingHorizontal: 14,
-    paddingVertical: 6,
+    paddingVertical: 7,
     borderRadius: 20,
-    marginBottom: 20,
+    marginBottom: 22,
     borderWidth: 1,
-    borderColor: "rgba(20,184,166,0.25)",
   },
-  heroBadgeText: {
-    fontSize: 12,
-    letterSpacing: 0.2,
-  },
+  heroBadgeDot: { width: 6, height: 6, borderRadius: 3 },
+  heroBadgeText: { fontSize: 12, letterSpacing: 0.1 },
   heroTitle: {
-    fontSize: 40,
-    lineHeight: 48,
+    fontSize: 42,
+    lineHeight: 50,
     textAlign: "center",
-    letterSpacing: -1,
+    letterSpacing: -1.5,
     marginBottom: 16,
   },
   heroSubtitle: {
     fontSize: 16,
-    lineHeight: 24,
+    lineHeight: 25,
     textAlign: "center",
-    marginBottom: 28,
-    paddingHorizontal: 10,
+    marginBottom: 30,
+    paddingHorizontal: 6,
   },
   ctaButton: {
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
-    paddingHorizontal: 32,
+    paddingHorizontal: 30,
     paddingVertical: 16,
-    borderRadius: 16,
-    marginBottom: 28,
+    borderRadius: 14,
+    marginBottom: 30,
   },
-  ctaText: {
-    color: "#FFFFFF",
-    fontSize: 17,
-  },
-  statsRow: {
-    flexDirection: "row",
-    gap: 12,
-  },
+  ctaText: { fontSize: 16 },
+  statsRow: { flexDirection: "row", gap: 10 },
   statBadge: {
     alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: 18,
+    paddingVertical: 14,
     borderRadius: 14,
     borderWidth: 1,
     flex: 1,
   },
-  statValue: {
-    fontSize: 20,
-    marginBottom: 2,
-  },
-  statLabel: {
-    fontSize: 11,
-  },
+  statValue: { fontSize: 22, marginBottom: 2 },
+  statLabel: { fontSize: 11 },
   previewCard: {
-    borderRadius: 20,
+    borderRadius: 18,
     borderWidth: 1,
+    padding: 18,
     marginBottom: 36,
-    overflow: "hidden",
-  },
-  previewGradient: {
-    padding: 20,
   },
   previewHeader: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 16,
+    marginBottom: 14,
   },
-  previewDay: {
-    fontSize: 16,
-  },
+  previewDay: { fontSize: 15 },
   previewBadge: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    backgroundColor: "rgba(20,184,166,0.12)",
     paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingVertical: 5,
     borderRadius: 20,
+    borderWidth: 1,
   },
-  activeDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: "#14B8A6",
-  },
-  previewBadgeText: {
-    fontSize: 12,
-  },
+  activeDot: { width: 6, height: 6, borderRadius: 3 },
+  previewBadgeText: { fontSize: 12 },
   previewItem: {
     flexDirection: "row",
     alignItems: "center",
     padding: 12,
-    borderRadius: 12,
+    borderRadius: 11,
     marginBottom: 8,
     borderWidth: 1,
     gap: 12,
   },
-  previewDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-  },
-  previewItemContent: {
-    flex: 1,
-  },
-  previewSubject: {
-    fontSize: 14,
-    marginBottom: 2,
-  },
-  previewTime: {
-    fontSize: 12,
-  },
-  progressPill: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+  previewCheck: {
+    width: 20,
+    height: 20,
     borderRadius: 10,
+    borderWidth: 1.5,
+    alignItems: "center",
+    justifyContent: "center",
   },
-  progressPillText: {
-    fontSize: 12,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    letterSpacing: -0.5,
-    marginBottom: 16,
-  },
+  previewItemContent: { flex: 1 },
+  previewSubject: { fontSize: 14, marginBottom: 2 },
+  previewTime: { fontSize: 12 },
+  sectionTitle: { fontSize: 26, letterSpacing: -0.8, marginBottom: 16 },
   featureCard: {
     flexDirection: "row",
     alignItems: "center",
     padding: 16,
-    borderRadius: 16,
-    marginBottom: 12,
+    borderRadius: 14,
+    marginBottom: 10,
     borderWidth: 1,
     gap: 14,
   },
   featureIconWrap: {
-    width: 44,
-    height: 44,
+    width: 42,
+    height: 42,
     borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
+    borderWidth: 1,
   },
-  featureTextWrap: {
-    flex: 1,
-  },
-  featureTitle: {
-    fontSize: 15,
-    marginBottom: 3,
-  },
-  featureDesc: {
-    fontSize: 13,
-    lineHeight: 18,
-  },
+  featureTextWrap: { flex: 1 },
+  featureTitle: { fontSize: 14, marginBottom: 3 },
+  featureDesc: { fontSize: 13, lineHeight: 19 },
   bottomCta: {
     marginTop: 20,
-    borderRadius: 20,
+    borderRadius: 18,
     padding: 24,
     alignItems: "center",
     borderWidth: 1,
     gap: 8,
   },
-  bottomCtaTitle: {
-    fontSize: 22,
-    letterSpacing: -0.5,
-  },
-  bottomCtaSubtitle: {
-    fontSize: 14,
-    textAlign: "center",
-    marginBottom: 8,
-  },
-  bottomCtaBtn: {
-    paddingHorizontal: 28,
-    paddingVertical: 14,
-    borderRadius: 14,
-  },
-  bottomCtaBtnText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-  },
+  bottomCtaTitle: { fontSize: 24, letterSpacing: -0.8 },
+  bottomCtaSubtitle: { fontSize: 14, textAlign: "center", marginBottom: 10 },
+  bottomCtaBtn: { paddingHorizontal: 28, paddingVertical: 14, borderRadius: 12 },
+  bottomCtaBtnText: { fontSize: 15 },
 });

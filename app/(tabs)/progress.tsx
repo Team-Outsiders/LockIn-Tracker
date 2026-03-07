@@ -5,83 +5,107 @@ import {
   StyleSheet,
   ScrollView,
   Platform,
-  Dimensions,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { LinearGradient } from "expo-linear-gradient";
-import { Ionicons } from "@expo/vector-icons";
+import { Feather, Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useStudy } from "@/contexts/StudyContext";
-import Colors from "@/constants/colors";
 
-const { width } = Dimensions.get("window");
 const DAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
-function WeeklyBar({ minutes, maxMinutes, day, isToday }: {
+function WeeklyBar({
+  minutes,
+  maxMinutes,
+  day,
+  isToday,
+}: {
   minutes: number;
   maxMinutes: number;
   day: string;
   isToday: boolean;
 }) {
   const { colors } = useTheme();
-  const height = maxMinutes > 0 ? Math.max((minutes / maxMinutes) * 100, minutes > 0 ? 8 : 0) : 0;
-  const displayTime = minutes >= 60 ? `${(minutes / 60).toFixed(1)}h` : minutes > 0 ? `${minutes}m` : "";
+  const height = maxMinutes > 0 ? Math.max((minutes / maxMinutes) * 100, minutes > 0 ? 10 : 0) : 0;
+  const displayTime =
+    minutes >= 60 ? `${(minutes / 60).toFixed(1)}h` : minutes > 0 ? `${minutes}m` : "";
 
   return (
     <View style={styles.barColumn}>
       {displayTime ? (
-        <Text style={[styles.barValue, { color: Colors.primary, fontFamily: "Inter_500Medium" }]}>
+        <Text style={[styles.barValue, { color: colors.textTertiary, fontFamily: "Satoshi-Medium" }]}>
           {displayTime}
         </Text>
-      ) : <View style={{ height: 18 }} />}
+      ) : (
+        <View style={{ height: 16 }} />
+      )}
       <View style={[styles.barTrack, { backgroundColor: colors.surfaceSecondary }]}>
         {minutes > 0 && (
-          <LinearGradient
-            colors={isToday ? ["#14B8A6", "#0D9488"] : ["#14B8A640", "#0D948840"]}
-            style={[styles.barFill, { height: `${height}%` as any }]}
+          <View
+            style={[
+              styles.barFill,
+              {
+                height: `${height}%` as any,
+                backgroundColor: isToday ? colors.text : colors.textTertiary,
+                opacity: isToday ? 1 : 0.5,
+              },
+            ]}
           />
         )}
       </View>
-      <Text style={[
-        styles.barDay,
-        {
-          color: isToday ? Colors.primary : colors.textTertiary,
-          fontFamily: isToday ? "Inter_600SemiBold" : "Inter_400Regular",
-        }
-      ]}>
+      <Text
+        style={[
+          styles.barDay,
+          {
+            color: isToday ? colors.text : colors.textTertiary,
+            fontFamily: isToday ? "Satoshi-Bold" : "Satoshi-Regular",
+          },
+        ]}
+      >
         {day}
       </Text>
     </View>
   );
 }
 
-function SubjectRow({ subject, color, completedSessions, totalSessions, totalMinutes }: {
+function SubjectRow({
+  subject,
+  completedSessions,
+  totalSessions,
+  totalMinutes,
+  index,
+}: {
   subject: string;
-  color: string;
   completedSessions: number;
   totalSessions: number;
   totalMinutes: number;
+  index: number;
 }) {
   const { colors } = useTheme();
   const percent = totalSessions > 0 ? completedSessions / totalSessions : 0;
-  const displayTime = totalMinutes >= 60
-    ? `${(totalMinutes / 60).toFixed(1)}h`
-    : `${totalMinutes}m`;
+  const displayTime =
+    totalMinutes >= 60 ? `${(totalMinutes / 60).toFixed(1)}h` : `${totalMinutes}m`;
 
   return (
     <View style={[styles.subjectRow, { backgroundColor: colors.card, borderColor: colors.cardBorder }]}>
-      <View style={[styles.subjectColorDot, { backgroundColor: color }]} />
       <View style={styles.subjectInfo}>
         <View style={styles.subjectHeaderRow}>
-          <Text style={[styles.subjectName, { color: colors.text, fontFamily: "Inter_600SemiBold" }]}>
+          <Text style={[styles.subjectName, { color: colors.text, fontFamily: "Satoshi-Medium" }]}>
             {subject}
           </Text>
-          <Text style={[styles.subjectMeta, { color: colors.textSecondary, fontFamily: "Inter_400Regular" }]}>
+          <Text style={[styles.subjectMeta, { color: colors.textSecondary, fontFamily: "Satoshi-Regular" }]}>
             {completedSessions}/{totalSessions} · {displayTime}
           </Text>
         </View>
         <View style={[styles.subjectBar, { backgroundColor: colors.surfaceSecondary }]}>
-          <View style={[styles.subjectBarFill, { width: `${percent * 100}%`, backgroundColor: color }]} />
+          <View
+            style={[
+              styles.subjectBarFill,
+              {
+                width: `${percent * 100}%`,
+                backgroundColor: colors.text,
+              },
+            ]}
+          />
         </View>
       </View>
     </View>
@@ -89,8 +113,13 @@ function SubjectRow({ subject, color, completedSessions, totalSessions, totalMin
 }
 
 export default function ProgressScreen() {
-  const { colors, isDark } = useTheme();
-  const { weeklyMinutes, subjectProgress, streakDays, totalMinutesToday, todaySessions, sessions } = useStudy();
+  const { colors } = useTheme();
+  const {
+    weeklyMinutes,
+    subjectProgress,
+    streakDays,
+    sessions,
+  } = useStudy();
   const insets = useSafeAreaInsets();
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
@@ -99,12 +128,9 @@ export default function ProgressScreen() {
   const maxWeeklyMinutes = Math.max(...weeklyMinutes, 1);
   const totalWeeklyMinutes = weeklyMinutes.reduce((a, b) => a + b, 0);
   const totalWeeklyHours = (totalWeeklyMinutes / 60).toFixed(1);
-
   const today = new Date();
   const todayDayIndex = (today.getDay() + 6) % 7;
-
   const completedSessionsTotal = sessions.filter((s) => s.completed).length;
-  const totalSessionsAll = sessions.length;
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -115,45 +141,37 @@ export default function ProgressScreen() {
           { paddingTop: topPad + 16, paddingBottom: bottomPad + 100 },
         ]}
       >
-        {/* Header */}
-        <Text style={[styles.pageTitle, { color: colors.text, fontFamily: "Inter_700Bold" }]}>
+        <Text style={[styles.pageTitle, { color: colors.text, fontFamily: "Satoshi-Black" }]}>
           Progress
         </Text>
 
         {/* Summary Cards */}
         <View style={styles.summaryRow}>
-          <LinearGradient
-            colors={["#14B8A6", "#0D9488"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={[styles.summaryCard, styles.summaryCardPrimary]}
-          >
-            <Ionicons name="time-outline" size={20} color="rgba(255,255,255,0.8)" />
-            <Text style={[styles.summaryValue, { fontFamily: "Inter_700Bold" }]}>
+          <View style={[styles.summaryCard, styles.summaryCardDark, { backgroundColor: colors.text }]}>
+            <Feather name="clock" size={16} color={colors.background} />
+            <Text style={[styles.summaryValue, { color: colors.background, fontFamily: "Satoshi-Black" }]}>
               {totalWeeklyHours}h
             </Text>
-            <Text style={[styles.summaryLabel, { fontFamily: "Inter_400Regular" }]}>
+            <Text style={[styles.summaryLabel, { color: colors.background + "99", fontFamily: "Satoshi-Regular" }]}>
               This Week
             </Text>
-          </LinearGradient>
-
+          </View>
           <View style={[styles.summaryCard, { backgroundColor: colors.card, borderColor: colors.cardBorder }]}>
-            <Ionicons name="flame-outline" size={20} color="#F59E0B" />
-            <Text style={[styles.summaryValue2, { color: colors.text, fontFamily: "Inter_700Bold" }]}>
+            <Ionicons name="flame-outline" size={16} color={colors.textSecondary} />
+            <Text style={[styles.summaryValue2, { color: colors.text, fontFamily: "Satoshi-Black" }]}>
               {streakDays}
             </Text>
-            <Text style={[styles.summaryLabel2, { color: colors.textSecondary, fontFamily: "Inter_400Regular" }]}>
-              Day Streak
+            <Text style={[styles.summaryLabel2, { color: colors.textSecondary, fontFamily: "Satoshi-Regular" }]}>
+              Streak
             </Text>
           </View>
-
           <View style={[styles.summaryCard, { backgroundColor: colors.card, borderColor: colors.cardBorder }]}>
-            <Ionicons name="checkmark-done-outline" size={20} color="#8B5CF6" />
-            <Text style={[styles.summaryValue2, { color: colors.text, fontFamily: "Inter_700Bold" }]}>
+            <Feather name="check-circle" size={16} color={colors.textSecondary} />
+            <Text style={[styles.summaryValue2, { color: colors.text, fontFamily: "Satoshi-Black" }]}>
               {completedSessionsTotal}
             </Text>
-            <Text style={[styles.summaryLabel2, { color: colors.textSecondary, fontFamily: "Inter_400Regular" }]}>
-              Sessions
+            <Text style={[styles.summaryLabel2, { color: colors.textSecondary, fontFamily: "Satoshi-Regular" }]}>
+              Done
             </Text>
           </View>
         </View>
@@ -161,10 +179,10 @@ export default function ProgressScreen() {
         {/* Weekly Chart */}
         <View style={[styles.weeklyChart, { backgroundColor: colors.card, borderColor: colors.cardBorder }]}>
           <View style={styles.chartHeader}>
-            <Text style={[styles.chartTitle, { color: colors.text, fontFamily: "Inter_600SemiBold" }]}>
+            <Text style={[styles.chartTitle, { color: colors.text, fontFamily: "Satoshi-Bold" }]}>
               Weekly Activity
             </Text>
-            <Text style={[styles.chartSubtitle, { color: colors.textSecondary, fontFamily: "Inter_400Regular" }]}>
+            <Text style={[styles.chartSubtitle, { color: colors.textSecondary, fontFamily: "Satoshi-Regular" }]}>
               {totalWeeklyMinutes > 0 ? `${totalWeeklyHours}h total` : "No data yet"}
             </Text>
           </View>
@@ -182,50 +200,47 @@ export default function ProgressScreen() {
         </View>
 
         {/* Subject Breakdown */}
-        <Text style={[styles.sectionTitle, { color: colors.text, fontFamily: "Inter_700Bold" }]}>
+        <Text style={[styles.sectionTitle, { color: colors.text, fontFamily: "Satoshi-Black" }]}>
           Subject Breakdown
         </Text>
 
         {subjectProgress.length === 0 ? (
           <View style={styles.emptyState}>
-            <View style={[styles.emptyIcon, { backgroundColor: `${Colors.primary}12` }]}>
-              <Ionicons name="bar-chart-outline" size={30} color={Colors.primary} />
+            <View style={[styles.emptyIcon, { backgroundColor: colors.surface, borderColor: colors.cardBorder }]}>
+              <Feather name="bar-chart-2" size={26} color={colors.textTertiary} />
             </View>
-            <Text style={[styles.emptyTitle, { color: colors.text, fontFamily: "Inter_600SemiBold" }]}>
+            <Text style={[styles.emptyTitle, { color: colors.text, fontFamily: "Satoshi-Bold" }]}>
               No data yet
             </Text>
-            <Text style={[styles.emptySubtitle, { color: colors.textSecondary, fontFamily: "Inter_400Regular" }]}>
-              Generate a study plan and complete sessions to see your progress here.
+            <Text style={[styles.emptySubtitle, { color: colors.textSecondary, fontFamily: "Satoshi-Regular" }]}>
+              Generate a study plan and complete sessions to see your progress.
             </Text>
           </View>
         ) : (
-          subjectProgress.map((sp) => (
+          subjectProgress.map((sp, i) => (
             <SubjectRow
               key={sp.subject}
               subject={sp.subject}
-              color={sp.color}
               completedSessions={sp.completedSessions}
               totalSessions={sp.totalSessions}
               totalMinutes={sp.totalMinutes}
+              index={i}
             />
           ))
         )}
 
-        {/* Motivation Card */}
+        {/* Streak card */}
         {streakDays >= 1 && (
           <View style={[
             styles.motivationCard,
-            {
-              backgroundColor: isDark ? "rgba(245,158,11,0.08)" : "rgba(245,158,11,0.06)",
-              borderColor: "rgba(245,158,11,0.25)",
-            }
+            { backgroundColor: colors.card, borderColor: colors.cardBorder },
           ]}>
-            <Ionicons name="flame" size={24} color="#F59E0B" />
+            <Ionicons name="flame" size={22} color={colors.text} />
             <View style={styles.motivationContent}>
-              <Text style={[styles.motivationTitle, { color: colors.text, fontFamily: "Inter_700Bold" }]}>
-                {streakDays === 1 ? "You're on a roll!" : `${streakDays}-day streak!`}
+              <Text style={[styles.motivationTitle, { color: colors.text, fontFamily: "Satoshi-Bold" }]}>
+                {streakDays === 1 ? "You're on a roll!" : `${streakDays}-day streak`}
               </Text>
-              <Text style={[styles.motivationText, { color: colors.textSecondary, fontFamily: "Inter_400Regular" }]}>
+              <Text style={[styles.motivationText, { color: colors.textSecondary, fontFamily: "Satoshi-Regular" }]}>
                 Keep studying daily to maintain your streak.
               </Text>
             </View>
@@ -238,25 +253,25 @@ export default function ProgressScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  scrollContent: { paddingHorizontal: 20 },
-  pageTitle: { fontSize: 28, letterSpacing: -0.8, marginBottom: 20 },
+  scrollContent: { paddingHorizontal: 22 },
+  pageTitle: { fontSize: 28, letterSpacing: -0.8, marginBottom: 22 },
   summaryRow: { flexDirection: "row", gap: 10, marginBottom: 20 },
   summaryCard: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
     paddingVertical: 16,
-    borderRadius: 16,
+    borderRadius: 14,
     gap: 4,
     borderWidth: 1,
   },
-  summaryCardPrimary: { borderWidth: 0 },
-  summaryValue: { fontSize: 22, color: "#FFFFFF" },
-  summaryLabel: { fontSize: 11, color: "rgba(255,255,255,0.75)" },
+  summaryCardDark: { borderWidth: 0 },
+  summaryValue: { fontSize: 22 },
+  summaryLabel: { fontSize: 11 },
   summaryValue2: { fontSize: 22 },
   summaryLabel2: { fontSize: 11 },
   weeklyChart: {
-    borderRadius: 20,
+    borderRadius: 18,
     borderWidth: 1,
     padding: 18,
     marginBottom: 28,
@@ -282,67 +297,52 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
     gap: 6,
   },
-  barValue: { fontSize: 10, textAlign: "center" },
+  barValue: { fontSize: 9, textAlign: "center" },
   barTrack: {
-    width: 28,
+    width: 26,
     height: 90,
-    borderRadius: 8,
+    borderRadius: 6,
     overflow: "hidden",
     justifyContent: "flex-end",
   },
-  barFill: {
-    width: "100%",
-    borderRadius: 8,
-  },
+  barFill: { width: "100%", borderRadius: 6 },
   barDay: { fontSize: 11 },
-  sectionTitle: { fontSize: 20, letterSpacing: -0.5, marginBottom: 14 },
+  sectionTitle: { fontSize: 22, letterSpacing: -0.5, marginBottom: 14 },
   subjectRow: {
-    flexDirection: "row",
-    alignItems: "center",
     padding: 14,
-    borderRadius: 14,
-    marginBottom: 10,
+    borderRadius: 13,
+    marginBottom: 9,
     borderWidth: 1,
-    gap: 12,
   },
-  subjectColorDot: { width: 10, height: 10, borderRadius: 5 },
   subjectInfo: { flex: 1 },
   subjectHeaderRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 8,
+    marginBottom: 10,
   },
   subjectName: { fontSize: 14 },
   subjectMeta: { fontSize: 12 },
-  subjectBar: { height: 6, borderRadius: 3, overflow: "hidden" },
+  subjectBar: { height: 5, borderRadius: 3, overflow: "hidden" },
   subjectBarFill: { height: "100%", borderRadius: 3 },
-  emptyState: {
-    alignItems: "center",
-    paddingVertical: 40,
-    gap: 12,
-  },
+  emptyState: { alignItems: "center", paddingVertical: 44, gap: 12 },
   emptyIcon: {
-    width: 68,
-    height: 68,
-    borderRadius: 34,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 4,
+    borderWidth: 1,
   },
   emptyTitle: { fontSize: 17 },
-  emptySubtitle: {
-    fontSize: 14,
-    textAlign: "center",
-    lineHeight: 20,
-    paddingHorizontal: 20,
-  },
+  emptySubtitle: { fontSize: 14, textAlign: "center", lineHeight: 21, paddingHorizontal: 20 },
   motivationCard: {
     flexDirection: "row",
     alignItems: "center",
     gap: 14,
     padding: 16,
-    borderRadius: 16,
+    borderRadius: 14,
     borderWidth: 1,
     marginTop: 16,
   },

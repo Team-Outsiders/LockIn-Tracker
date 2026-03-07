@@ -1,14 +1,8 @@
-import {
-  Inter_400Regular,
-  Inter_500Medium,
-  Inter_600SemiBold,
-  Inter_700Bold,
-  useFonts,
-} from "@expo-google-fonts/inter";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import React, { useEffect } from "react";
+import * as Font from "expo-font";
+import React, { useEffect, useState } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -28,18 +22,29 @@ function RootLayoutNav() {
 }
 
 export default function RootLayout() {
-  const [fontsLoaded, fontError] = useFonts({
-    Inter_400Regular,
-    Inter_500Medium,
-    Inter_600SemiBold,
-    Inter_700Bold,
-  });
+  const [fontsLoaded, setFontsLoaded] = useState(false);
+  const [fontError, setFontError] = useState(false);
 
   useEffect(() => {
-    if (fontsLoaded || fontError) {
+    Font.loadAsync({
+      "Satoshi-Light": require("../assets/fonts/Satoshi-Light.ttf"),
+      "Satoshi-Regular": require("../assets/fonts/Satoshi-Regular.ttf"),
+      "Satoshi-Medium": require("../assets/fonts/Satoshi-Medium.ttf"),
+      "Satoshi-Bold": require("../assets/fonts/Satoshi-Bold.ttf"),
+      "Satoshi-Black": require("../assets/fonts/Satoshi-Black.ttf"),
+    })
+      .then(() => setFontsLoaded(true))
+      .catch(() => {
+        setFontError(true);
+        setFontsLoaded(true);
+      });
+  }, []);
+
+  useEffect(() => {
+    if (fontsLoaded) {
       SplashScreen.hideAsync();
     }
-  }, [fontsLoaded, fontError]);
+  }, [fontsLoaded]);
 
   if (!fontsLoaded && !fontError) return null;
 

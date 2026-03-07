@@ -9,16 +9,14 @@ import {
   Alert,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
+import { Feather, Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useStudy } from "@/contexts/StudyContext";
-import Colors from "@/constants/colors";
 
 function SettingRow({
   icon,
-  iconBg,
   label,
   description,
   right,
@@ -26,7 +24,6 @@ function SettingRow({
   destructive,
 }: {
   icon: React.ReactNode;
-  iconBg: string;
   label: string;
   description?: string;
   right?: React.ReactNode;
@@ -40,43 +37,26 @@ function SettingRow({
       onPress={onPress}
       style={({ pressed }) => [
         styles.settingRow,
-        {
-          backgroundColor: colors.card,
-          borderColor: colors.cardBorder,
-          opacity: pressed ? 0.8 : 1,
-        },
+        { backgroundColor: colors.card, borderColor: colors.cardBorder, opacity: pressed ? 0.75 : 1 },
       ]}
     >
-      <View style={[styles.settingIcon, { backgroundColor: iconBg }]}>
+      <View style={[styles.settingIcon, { backgroundColor: colors.surface, borderColor: colors.cardBorder }]}>
         {icon}
       </View>
       <View style={styles.settingContent}>
-        <Text
-          style={[
-            styles.settingLabel,
-            {
-              color: destructive ? colors.destructive : colors.text,
-              fontFamily: "Inter_600SemiBold",
-            },
-          ]}
-        >
+        <Text style={[
+          styles.settingLabel,
+          { color: destructive ? colors.destructive : colors.text, fontFamily: "Satoshi-Medium" },
+        ]}>
           {label}
         </Text>
         {description && (
-          <Text
-            style={[
-              styles.settingDesc,
-              { color: colors.textSecondary, fontFamily: "Inter_400Regular" },
-            ]}
-          >
+          <Text style={[styles.settingDesc, { color: colors.textTertiary, fontFamily: "Satoshi-Regular" }]}>
             {description}
           </Text>
         )}
       </View>
-      {right ||
-        (onPress && (
-          <Ionicons name="chevron-forward" size={16} color={colors.textTertiary} />
-        ))}
+      {right || (onPress && <Feather name="chevron-right" size={15} color={colors.textTertiary} />)}
     </Pressable>
   );
 }
@@ -103,37 +83,32 @@ function ThemeOption({
       style={[
         styles.themeOption,
         {
-          backgroundColor: selected ? `${Colors.primary}15` : colors.surface,
-          borderColor: selected ? Colors.primary : colors.cardBorder,
+          backgroundColor: selected ? colors.text : colors.surface,
+          borderColor: selected ? colors.text : colors.cardBorder,
         },
       ]}
     >
       <Ionicons
         name={icon as any}
-        size={20}
-        color={selected ? Colors.primary : colors.textSecondary}
+        size={18}
+        color={selected ? colors.background : colors.textSecondary}
       />
-      <Text
-        style={[
-          styles.themeOptionText,
-          {
-            color: selected ? Colors.primary : colors.textSecondary,
-            fontFamily: selected ? "Inter_600SemiBold" : "Inter_400Regular",
-          },
-        ]}
-      >
+      <Text style={[
+        styles.themeOptionText,
+        {
+          color: selected ? colors.background : colors.textSecondary,
+          fontFamily: selected ? "Satoshi-Bold" : "Satoshi-Regular",
+        },
+      ]}>
         {label}
       </Text>
-      {selected && (
-        <Ionicons name="checkmark" size={14} color={Colors.primary} />
-      )}
     </Pressable>
   );
 }
 
 export default function SettingsScreen() {
-  const { colors, isDark, themeMode, setThemeMode } = useTheme();
-  const { clearAll, sessions, activePlan, streakDays, subjectProgress } = useStudy();
+  const { colors, themeMode, setThemeMode } = useTheme();
+  const { clearAll, sessions, subjectProgress, streakDays } = useStudy();
   const insets = useSafeAreaInsets();
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
@@ -146,7 +121,7 @@ export default function SettingsScreen() {
   const handleClearData = () => {
     Alert.alert(
       "Clear All Data",
-      "This will delete all your study sessions and plans. This cannot be undone.",
+      "This will delete all your sessions and plans. This cannot be undone.",
       [
         { text: "Cancel", style: "cancel" },
         {
@@ -170,98 +145,38 @@ export default function SettingsScreen() {
           { paddingTop: topPad + 16, paddingBottom: bottomPad + 100 },
         ]}
       >
-        {/* Header */}
-        <Text
-          style={[
-            styles.pageTitle,
-            { color: colors.text, fontFamily: "Inter_700Bold" },
-          ]}
-        >
+        <Text style={[styles.pageTitle, { color: colors.text, fontFamily: "Satoshi-Black" }]}>
           Settings
         </Text>
 
         {/* Profile Card */}
-        <View
-          style={[
-            styles.profileCard,
-            { backgroundColor: colors.card, borderColor: colors.cardBorder },
-          ]}
-        >
-          <View
-            style={[
-              styles.profileAvatar,
-              { backgroundColor: `${Colors.primary}20` },
-            ]}
-          >
-            <Ionicons name="lock-closed" size={28} color={Colors.primary} />
+        <View style={[styles.profileCard, { backgroundColor: colors.card, borderColor: colors.cardBorder }]}>
+          <View style={[styles.profileAvatar, { backgroundColor: colors.surface, borderColor: colors.cardBorder }]}>
+            <Feather name="lock" size={24} color={colors.text} />
           </View>
           <View>
-            <Text
-              style={[
-                styles.profileName,
-                { color: colors.text, fontFamily: "Inter_700Bold" },
-              ]}
-            >
+            <Text style={[styles.profileName, { color: colors.text, fontFamily: "Satoshi-Black" }]}>
               Lock In
             </Text>
-            <Text
-              style={[
-                styles.profileSub,
-                { color: colors.textSecondary, fontFamily: "Inter_400Regular" },
-              ]}
-            >
+            <Text style={[styles.profileSub, { color: colors.textSecondary, fontFamily: "Satoshi-Regular" }]}>
               AI Study Planner
             </Text>
           </View>
         </View>
 
-        {/* Stats Overview */}
+        {/* Stats */}
         <View style={styles.statsGrid}>
           {[
-            {
-              value: `${streakDays}`,
-              label: "Streak",
-              icon: "flame",
-              color: "#F59E0B",
-            },
-            {
-              value: `${totalHours}h`,
-              label: "Studied",
-              icon: "time-outline",
-              color: Colors.primary,
-            },
-            {
-              value: `${subjectProgress.length}`,
-              label: "Subjects",
-              icon: "book-outline",
-              color: "#8B5CF6",
-            },
+            { value: `${streakDays}`, label: "Streak", icon: "flame-outline" as const },
+            { value: `${totalHours}h`, label: "Studied", icon: "time-outline" as const },
+            { value: `${subjectProgress.length}`, label: "Subjects", icon: "book-outline" as const },
           ].map((stat, i) => (
-            <View
-              key={i}
-              style={[
-                styles.statCard,
-                { backgroundColor: colors.card, borderColor: colors.cardBorder },
-              ]}
-            >
-              <Ionicons name={stat.icon as any} size={18} color={stat.color} />
-              <Text
-                style={[
-                  styles.statValue,
-                  { color: colors.text, fontFamily: "Inter_700Bold" },
-                ]}
-              >
+            <View key={i} style={[styles.statCard, { backgroundColor: colors.card, borderColor: colors.cardBorder }]}>
+              <Ionicons name={stat.icon} size={16} color={colors.textSecondary} />
+              <Text style={[styles.statValue, { color: colors.text, fontFamily: "Satoshi-Black" }]}>
                 {stat.value}
               </Text>
-              <Text
-                style={[
-                  styles.statLabel,
-                  {
-                    color: colors.textSecondary,
-                    fontFamily: "Inter_400Regular",
-                  },
-                ]}
-              >
+              <Text style={[styles.statLabel, { color: colors.textSecondary, fontFamily: "Satoshi-Regular" }]}>
                 {stat.label}
               </Text>
             </View>
@@ -269,95 +184,44 @@ export default function SettingsScreen() {
         </View>
 
         {/* Appearance */}
-        <Text
-          style={[
-            styles.sectionLabel,
-            { color: colors.textSecondary, fontFamily: "Inter_600SemiBold" },
-          ]}
-        >
+        <Text style={[styles.sectionLabel, { color: colors.textTertiary, fontFamily: "Satoshi-Bold" }]}>
           APPEARANCE
         </Text>
-        <View
-          style={[
-            styles.themeCard,
-            { backgroundColor: colors.card, borderColor: colors.cardBorder },
-          ]}
-        >
+        <View style={[styles.themeCard, { backgroundColor: colors.card, borderColor: colors.cardBorder }]}>
           <View style={styles.themeOptions}>
-            <ThemeOption
-              label="Light"
-              icon="sunny-outline"
-              mode="light"
-              current={themeMode}
-              onPress={() => {
-                Haptics.selectionAsync();
-                setThemeMode("light");
-              }}
-            />
-            <ThemeOption
-              label="Dark"
-              icon="moon-outline"
-              mode="dark"
-              current={themeMode}
-              onPress={() => {
-                Haptics.selectionAsync();
-                setThemeMode("dark");
-              }}
-            />
-            <ThemeOption
-              label="System"
-              icon="phone-portrait-outline"
-              mode="system"
-              current={themeMode}
-              onPress={() => {
-                Haptics.selectionAsync();
-                setThemeMode("system");
-              }}
-            />
+            <ThemeOption label="Light" icon="sunny-outline" mode="light" current={themeMode}
+              onPress={() => { Haptics.selectionAsync(); setThemeMode("light"); }} />
+            <ThemeOption label="Dark" icon="moon-outline" mode="dark" current={themeMode}
+              onPress={() => { Haptics.selectionAsync(); setThemeMode("dark"); }} />
+            <ThemeOption label="System" icon="phone-portrait-outline" mode="system" current={themeMode}
+              onPress={() => { Haptics.selectionAsync(); setThemeMode("system"); }} />
           </View>
         </View>
 
         {/* App */}
-        <Text
-          style={[
-            styles.sectionLabel,
-            { color: colors.textSecondary, fontFamily: "Inter_600SemiBold" },
-          ]}
-        >
+        <Text style={[styles.sectionLabel, { color: colors.textTertiary, fontFamily: "Satoshi-Bold" }]}>
           APP
         </Text>
 
         <SettingRow
-          icon={<Ionicons name="home-outline" size={18} color="#FFFFFF" />}
-          iconBg="#14B8A6"
-          label="Go to Home"
+          icon={<Feather name="home" size={16} color={colors.textSecondary} />}
+          label="Home Page"
           description="View the app landing page"
-          onPress={() => {
-            Haptics.selectionAsync();
-            router.push("/");
-          }}
+          onPress={() => { Haptics.selectionAsync(); router.push("/"); }}
         />
-
         <SettingRow
-          icon={<Ionicons name="information-circle-outline" size={18} color="#FFFFFF" />}
-          iconBg="#3B82F6"
-          label="About Lock In"
-          description="Version 1.0.0"
+          icon={<Feather name="info" size={16} color={colors.textSecondary} />}
+          label="About"
+          description="Lock In · Version 1.0.0"
         />
 
         {/* Data */}
-        <Text
-          style={[
-            styles.sectionLabel,
-            { color: colors.textSecondary, fontFamily: "Inter_600SemiBold" },
-          ]}
-        >
+        <Text style={[styles.sectionLabel, { color: colors.textTertiary, fontFamily: "Satoshi-Bold" }]}>
           DATA
         </Text>
 
         <SettingRow
-          icon={<Ionicons name="trash-outline" size={18} color="#FFFFFF" />}
-          iconBg="#EF4444"
+          icon={<Feather name="trash-2" size={16} color={colors.destructive} />}
           label="Clear All Data"
           description="Delete all sessions and plans"
           onPress={handleClearData}
@@ -370,59 +234,46 @@ export default function SettingsScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  scrollContent: { paddingHorizontal: 20 },
-  pageTitle: { fontSize: 28, letterSpacing: -0.8, marginBottom: 20 },
+  scrollContent: { paddingHorizontal: 22 },
+  pageTitle: { fontSize: 28, letterSpacing: -0.8, marginBottom: 22 },
   profileCard: {
     flexDirection: "row",
     alignItems: "center",
     gap: 16,
     padding: 18,
-    borderRadius: 18,
+    borderRadius: 16,
     borderWidth: 1,
     marginBottom: 16,
   },
   profileAvatar: {
-    width: 56,
-    height: 56,
-    borderRadius: 16,
+    width: 52,
+    height: 52,
+    borderRadius: 14,
     alignItems: "center",
     justifyContent: "center",
+    borderWidth: 1,
   },
   profileName: { fontSize: 20, marginBottom: 2 },
   profileSub: { fontSize: 13 },
-  statsGrid: {
-    flexDirection: "row",
-    gap: 10,
-    marginBottom: 28,
-  },
+  statsGrid: { flexDirection: "row", gap: 10, marginBottom: 28 },
   statCard: {
     flex: 1,
     alignItems: "center",
     paddingVertical: 16,
-    borderRadius: 14,
+    borderRadius: 13,
     borderWidth: 1,
     gap: 4,
   },
   statValue: { fontSize: 18 },
   statLabel: { fontSize: 11 },
-  sectionLabel: {
-    fontSize: 11,
-    letterSpacing: 1,
-    marginBottom: 8,
-    marginLeft: 4,
-  },
-  themeCard: {
-    borderRadius: 16,
-    borderWidth: 1,
-    padding: 12,
-    marginBottom: 24,
-  },
+  sectionLabel: { fontSize: 11, letterSpacing: 0.8, marginBottom: 8, marginLeft: 2 },
+  themeCard: { borderRadius: 14, borderWidth: 1, padding: 10, marginBottom: 24 },
   themeOptions: { flexDirection: "row", gap: 8 },
   themeOption: {
     flex: 1,
     alignItems: "center",
     paddingVertical: 12,
-    borderRadius: 12,
+    borderRadius: 10,
     borderWidth: 1,
     gap: 5,
   },
@@ -431,19 +282,20 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     padding: 14,
-    borderRadius: 14,
-    marginBottom: 10,
+    borderRadius: 13,
+    marginBottom: 9,
     borderWidth: 1,
     gap: 12,
   },
   settingIcon: {
-    width: 38,
-    height: 38,
-    borderRadius: 11,
+    width: 36,
+    height: 36,
+    borderRadius: 10,
     alignItems: "center",
     justifyContent: "center",
+    borderWidth: 1,
   },
   settingContent: { flex: 1 },
-  settingLabel: { fontSize: 15, marginBottom: 1 },
+  settingLabel: { fontSize: 14, marginBottom: 1 },
   settingDesc: { fontSize: 12 },
 });

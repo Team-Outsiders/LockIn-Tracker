@@ -16,7 +16,7 @@ function NativeTabLayout() {
         <Label>Today</Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="planner">
-        <Icon sf={{ default: "sparkles", selected: "sparkles" }} />
+        <Icon sf={{ default: "cpu", selected: "cpu.fill" }} />
         <Label>AI Planner</Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="progress">
@@ -39,14 +39,14 @@ function ClassicTabLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: colors.tint,
+        tabBarActiveTintColor: colors.text,
         tabBarInactiveTintColor: colors.tabIconDefault,
         tabBarStyle: {
           position: "absolute",
           backgroundColor: Platform.select({
             ios: "transparent",
-            android: isDark ? "#0A0E1A" : "#FFFFFF",
-            web: isDark ? "#0A0E1A" : "#FFFFFF",
+            android: isDark ? "#141414" : "#FFFFFF",
+            web: isDark ? "#141414" : "#FFFFFF",
           }),
           borderTopWidth: 1,
           borderTopColor: colors.cardBorder,
@@ -56,13 +56,13 @@ function ClassicTabLayout() {
         tabBarBackground: () =>
           Platform.OS === "ios" ? (
             <BlurView
-              intensity={100}
+              intensity={90}
               tint={isDark ? "dark" : "light"}
               style={StyleSheet.absoluteFill}
             />
           ) : null,
         tabBarLabelStyle: {
-          fontFamily: "Inter_500Medium",
+          fontFamily: "Satoshi-Medium",
           fontSize: 11,
         },
       }}
@@ -81,7 +81,7 @@ function ClassicTabLayout() {
         options={{
           title: "AI Planner",
           tabBarIcon: ({ color }) => (
-            <SymbolView name="sparkles" tintColor={color} size={22} />
+            <SymbolView name="cpu" tintColor={color} size={22} />
           ),
         }}
       />

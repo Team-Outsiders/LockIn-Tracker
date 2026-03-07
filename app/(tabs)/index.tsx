@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import {
   View,
   Text,
@@ -8,8 +8,7 @@ import {
   Platform,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { LinearGradient } from "expo-linear-gradient";
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { Feather, Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import Animated, {
   useSharedValue,
@@ -19,30 +18,32 @@ import Animated, {
 } from "react-native-reanimated";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useStudy, StudySession } from "@/contexts/StudyContext";
-import Colors from "@/constants/colors";
 
-function SessionCard({ session, onToggle }: { session: StudySession; onToggle: () => void }) {
+function SessionCard({
+  session,
+  onToggle,
+}: {
+  session: StudySession;
+  onToggle: () => void;
+}) {
   const { colors } = useTheme();
   const scale = useSharedValue(1);
-  const opacity = useSharedValue(session.completed ? 0.6 : 1);
 
   const animStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
-    opacity: opacity.value,
   }));
 
   const handlePress = () => {
     scale.value = withSpring(0.97, { damping: 15 }, () => {
       scale.value = withSpring(1);
     });
-    opacity.value = withTiming(session.completed ? 1 : 0.6, { duration: 200 });
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     onToggle();
   };
 
   const durationText =
     session.duration >= 60
-      ? `${Math.floor(session.duration / 60)}h ${session.duration % 60 > 0 ? `${session.duration % 60}m` : ""}`
+      ? `${Math.floor(session.duration / 60)}h${session.duration % 60 > 0 ? ` ${session.duration % 60}m` : ""}`
       : `${session.duration}m`;
 
   return (
@@ -54,8 +55,9 @@ function SessionCard({ session, onToggle }: { session: StudySession; onToggle: (
           {
             backgroundColor: colors.card,
             borderColor: session.completed
-              ? `${Colors.primary}40`
+              ? colors.text + "30"
               : colors.cardBorder,
+            opacity: session.completed ? 0.65 : 1,
           },
         ]}
       >
@@ -63,15 +65,13 @@ function SessionCard({ session, onToggle }: { session: StudySession; onToggle: (
           style={[
             styles.sessionCheck,
             {
-              backgroundColor: session.completed
-                ? Colors.primary
-                : "transparent",
-              borderColor: session.completed ? Colors.primary : colors.cardBorder,
+              backgroundColor: session.completed ? colors.text : "transparent",
+              borderColor: session.completed ? colors.text : colors.textTertiary,
             },
           ]}
         >
           {session.completed && (
-            <Ionicons name="checkmark" size={14} color="#FFFFFF" />
+            <Feather name="check" size={11} color={colors.background} />
           )}
         </View>
         <View style={styles.sessionInfo}>
@@ -79,8 +79,8 @@ function SessionCard({ session, onToggle }: { session: StudySession; onToggle: (
             style={[
               styles.sessionSubject,
               {
-                color: colors.text,
-                fontFamily: "Inter_600SemiBold",
+                color: session.completed ? colors.textTertiary : colors.text,
+                fontFamily: "Satoshi-Medium",
                 textDecorationLine: session.completed ? "line-through" : "none",
               },
             ]}
@@ -88,11 +88,11 @@ function SessionCard({ session, onToggle }: { session: StudySession; onToggle: (
             {session.subject}
           </Text>
           <View style={styles.sessionMeta}>
-            <Ionicons name="time-outline" size={12} color={colors.textTertiary} />
+            <Feather name="clock" size={11} color={colors.textTertiary} />
             <Text
               style={[
                 styles.sessionTime,
-                { color: colors.textTertiary, fontFamily: "Inter_400Regular" },
+                { color: colors.textTertiary, fontFamily: "Satoshi-Regular" },
               ]}
             >
               {session.startTime} · {durationText}
@@ -104,8 +104,9 @@ function SessionCard({ session, onToggle }: { session: StudySession; onToggle: (
             styles.sessionDurationBadge,
             {
               backgroundColor: session.completed
-                ? `${Colors.primary}15`
-                : colors.surfaceSecondary,
+                ? colors.text + "10"
+                : colors.surface,
+              borderColor: colors.cardBorder,
             },
           ]}
         >
@@ -113,8 +114,8 @@ function SessionCard({ session, onToggle }: { session: StudySession; onToggle: (
             style={[
               styles.sessionDurationText,
               {
-                color: session.completed ? Colors.primary : colors.textSecondary,
-                fontFamily: "Inter_600SemiBold",
+                color: session.completed ? colors.textTertiary : colors.textSecondary,
+                fontFamily: "Satoshi-Medium",
               },
             ]}
           >
@@ -126,31 +127,17 @@ function SessionCard({ session, onToggle }: { session: StudySession; onToggle: (
   );
 }
 
-function EmptyState({ colors }: { colors: any }) {
+function EmptyState() {
+  const { colors } = useTheme();
   return (
     <View style={styles.emptyState}>
-      <View
-        style={[
-          styles.emptyIcon,
-          { backgroundColor: `${Colors.primary}15` },
-        ]}
-      >
-        <Ionicons name="calendar-outline" size={32} color={Colors.primary} />
+      <View style={[styles.emptyIcon, { backgroundColor: colors.surface, borderColor: colors.cardBorder }]}>
+        <Feather name="calendar" size={28} color={colors.textTertiary} />
       </View>
-      <Text
-        style={[
-          styles.emptyTitle,
-          { color: colors.text, fontFamily: "Inter_600SemiBold" },
-        ]}
-      >
+      <Text style={[styles.emptyTitle, { color: colors.text, fontFamily: "Satoshi-Bold" }]}>
         No sessions today
       </Text>
-      <Text
-        style={[
-          styles.emptySubtitle,
-          { color: colors.textSecondary, fontFamily: "Inter_400Regular" },
-        ]}
-      >
+      <Text style={[styles.emptySubtitle, { color: colors.textSecondary, fontFamily: "Satoshi-Regular" }]}>
         Head to the AI Planner tab to generate your personalized study plan.
       </Text>
     </View>
@@ -172,10 +159,7 @@ export default function TodayScreen() {
 
   const today = new Date();
   const dayName = today.toLocaleDateString("en-US", { weekday: "long" });
-  const dateStr = today.toLocaleDateString("en-US", {
-    month: "long",
-    day: "numeric",
-  });
+  const dateStr = today.toLocaleDateString("en-US", { month: "long", day: "numeric" });
 
   const completedCount = todaySessions.filter((s) => s.completed).length;
   const totalCount = todaySessions.length;
@@ -192,45 +176,25 @@ export default function TodayScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={[
           styles.scrollContent,
-          {
-            paddingTop: topPad + 16,
-            paddingBottom: bottomPad + 100,
-          },
+          { paddingTop: topPad + 16, paddingBottom: bottomPad + 100 },
         ]}
       >
         {/* Header */}
         <View style={styles.header}>
           <View>
-            <Text
-              style={[
-                styles.dayText,
-                { color: Colors.primary, fontFamily: "Inter_600SemiBold" },
-              ]}
-            >
+            <Text style={[styles.dayText, { color: colors.textTertiary, fontFamily: "Satoshi-Regular" }]}>
               {dayName}
             </Text>
-            <Text
-              style={[
-                styles.dateText,
-                { color: colors.text, fontFamily: "Inter_700Bold" },
-              ]}
-            >
+            <Text style={[styles.dateText, { color: colors.text, fontFamily: "Satoshi-Black" }]}>
               {dateStr}
             </Text>
           </View>
-          <View
-            style={[
-              styles.streakBadge,
-              { backgroundColor: `rgba(245,158,11,0.12)`, borderColor: `rgba(245,158,11,0.3)` },
-            ]}
-          >
-            <Ionicons name="flame" size={16} color="#F59E0B" />
-            <Text
-              style={[
-                styles.streakText,
-                { color: "#F59E0B", fontFamily: "Inter_700Bold" },
-              ]}
-            >
+          <View style={[
+            styles.streakBadge,
+            { backgroundColor: colors.surface, borderColor: colors.cardBorder },
+          ]}>
+            <Ionicons name="flame" size={14} color={colors.text} />
+            <Text style={[styles.streakText, { color: colors.text, fontFamily: "Satoshi-Bold" }]}>
               {streakDays}
             </Text>
           </View>
@@ -238,67 +202,30 @@ export default function TodayScreen() {
 
         {/* Stats Row */}
         <View style={styles.statsRow}>
-          <LinearGradient
-            colors={["#14B8A6", "#0D9488"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={[styles.statCard, styles.statCardPrimary]}
-          >
-            <MaterialCommunityIcons name="clock-fast" size={20} color="rgba(255,255,255,0.8)" />
-            <Text style={[styles.statCardValue, { fontFamily: "Inter_700Bold" }]}>
+          <View style={[styles.statCard, styles.statCardPrimary, { backgroundColor: colors.text }]}>
+            <Feather name="clock" size={16} color={colors.background} />
+            <Text style={[styles.statCardValue, { color: colors.background, fontFamily: "Satoshi-Black" }]}>
               {totalMinutesToday > 0 ? hoursToday : "0m"}
             </Text>
-            <Text style={[styles.statCardLabel, { fontFamily: "Inter_400Regular" }]}>
+            <Text style={[styles.statCardLabel, { color: colors.background + "AA", fontFamily: "Satoshi-Regular" }]}>
               Studied
             </Text>
-          </LinearGradient>
-
-          <View
-            style={[
-              styles.statCard,
-              { backgroundColor: colors.card, borderColor: colors.cardBorder },
-            ]}
-          >
-            <Ionicons name="checkmark-circle-outline" size={20} color={Colors.primary} />
-            <Text
-              style={[
-                styles.statCardValue2,
-                { color: colors.text, fontFamily: "Inter_700Bold" },
-              ]}
-            >
+          </View>
+          <View style={[styles.statCard, { backgroundColor: colors.card, borderColor: colors.cardBorder }]}>
+            <Feather name="check-circle" size={16} color={colors.textSecondary} />
+            <Text style={[styles.statCardValue2, { color: colors.text, fontFamily: "Satoshi-Black" }]}>
               {completedCount}/{totalCount}
             </Text>
-            <Text
-              style={[
-                styles.statCardLabel2,
-                { color: colors.textSecondary, fontFamily: "Inter_400Regular" },
-              ]}
-            >
+            <Text style={[styles.statCardLabel2, { color: colors.textSecondary, fontFamily: "Satoshi-Regular" }]}>
               Sessions
             </Text>
           </View>
-
-          <View
-            style={[
-              styles.statCard,
-              { backgroundColor: colors.card, borderColor: colors.cardBorder },
-            ]}
-          >
-            <Ionicons name="trophy-outline" size={20} color="#F59E0B" />
-            <Text
-              style={[
-                styles.statCardValue2,
-                { color: colors.text, fontFamily: "Inter_700Bold" },
-              ]}
-            >
+          <View style={[styles.statCard, { backgroundColor: colors.card, borderColor: colors.cardBorder }]}>
+            <Ionicons name="trophy-outline" size={16} color={colors.textSecondary} />
+            <Text style={[styles.statCardValue2, { color: colors.text, fontFamily: "Satoshi-Black" }]}>
               {streakDays}
             </Text>
-            <Text
-              style={[
-                styles.statCardLabel2,
-                { color: colors.textSecondary, fontFamily: "Inter_400Regular" },
-              ]}
-            >
+            <Text style={[styles.statCardLabel2, { color: colors.textSecondary, fontFamily: "Satoshi-Regular" }]}>
               Streak
             </Text>
           </View>
@@ -306,61 +233,36 @@ export default function TodayScreen() {
 
         {/* Progress Bar */}
         {totalCount > 0 && (
-          <View
-            style={[
-              styles.progressSection,
-              {
-                backgroundColor: colors.card,
-                borderColor: colors.cardBorder,
-              },
-            ]}
-          >
+          <View style={[
+            styles.progressSection,
+            { backgroundColor: colors.card, borderColor: colors.cardBorder },
+          ]}>
             <View style={styles.progressHeader}>
-              <Text
-                style={[
-                  styles.progressLabel,
-                  { color: colors.text, fontFamily: "Inter_600SemiBold" },
-                ]}
-              >
+              <Text style={[styles.progressLabel, { color: colors.text, fontFamily: "Satoshi-Medium" }]}>
                 Daily Progress
               </Text>
-              <Text
-                style={[
-                  styles.progressPercent,
-                  { color: Colors.primary, fontFamily: "Inter_700Bold" },
-                ]}
-              >
+              <Text style={[styles.progressPercent, { color: colors.text, fontFamily: "Satoshi-Bold" }]}>
                 {Math.round(completionPercent * 100)}%
               </Text>
             </View>
-            <View
-              style={[
-                styles.progressBar,
-                { backgroundColor: isDark ? "#1E293B" : "#E2E8F0" },
-              ]}
-            >
+            <View style={[styles.progressBar, { backgroundColor: colors.surfaceSecondary }]}>
               <View
                 style={[
                   styles.progressFill,
-                  { width: `${completionPercent * 100}%` },
+                  { width: `${completionPercent * 100}%`, backgroundColor: colors.text },
                 ]}
               />
             </View>
           </View>
         )}
 
-        {/* Today's Sessions */}
-        <Text
-          style={[
-            styles.sectionTitle,
-            { color: colors.text, fontFamily: "Inter_700Bold" },
-          ]}
-        >
+        {/* Sessions */}
+        <Text style={[styles.sectionTitle, { color: colors.text, fontFamily: "Satoshi-Black" }]}>
           Today's Sessions
         </Text>
 
         {todaySessions.length === 0 ? (
-          <EmptyState colors={colors} />
+          <EmptyState />
         ) : (
           todaySessions.map((session) => (
             <SessionCard
@@ -377,59 +279,43 @@ export default function TodayScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  scrollContent: { paddingHorizontal: 20 },
+  scrollContent: { paddingHorizontal: 22 },
   header: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 20,
+    marginBottom: 22,
   },
-  dayText: { fontSize: 14, marginBottom: 2 },
-  dateText: { fontSize: 26, letterSpacing: -0.8 },
+  dayText: { fontSize: 13, marginBottom: 2 },
+  dateText: { fontSize: 28, letterSpacing: -1 },
   streakBadge: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 4,
-    paddingHorizontal: 12,
-    paddingVertical: 7,
+    gap: 5,
+    paddingHorizontal: 13,
+    paddingVertical: 8,
     borderRadius: 20,
     borderWidth: 1,
   },
-  streakText: { fontSize: 16 },
-  statsRow: {
-    flexDirection: "row",
-    gap: 10,
-    marginBottom: 20,
-  },
+  streakText: { fontSize: 15 },
+  statsRow: { flexDirection: "row", gap: 10, marginBottom: 20 },
   statCard: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 14,
-    borderRadius: 16,
+    paddingVertical: 16,
+    borderRadius: 14,
     gap: 4,
     borderWidth: 1,
   },
-  statCardPrimary: {
-    borderWidth: 0,
-  },
-  statCardValue: {
-    fontSize: 20,
-    color: "#FFFFFF",
-  },
-  statCardLabel: {
-    fontSize: 11,
-    color: "rgba(255,255,255,0.75)",
-  },
-  statCardValue2: {
-    fontSize: 20,
-  },
-  statCardLabel2: {
-    fontSize: 11,
-  },
+  statCardPrimary: { borderWidth: 0 },
+  statCardValue: { fontSize: 20 },
+  statCardLabel: { fontSize: 11 },
+  statCardValue2: { fontSize: 20 },
+  statCardLabel2: { fontSize: 11 },
   progressSection: {
     padding: 16,
-    borderRadius: 16,
+    borderRadius: 14,
     marginBottom: 24,
     borderWidth: 1,
   },
@@ -440,71 +326,53 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   progressLabel: { fontSize: 14 },
-  progressPercent: { fontSize: 16 },
-  progressBar: {
-    height: 8,
-    borderRadius: 4,
-    overflow: "hidden",
-  },
-  progressFill: {
-    height: "100%",
-    backgroundColor: "#14B8A6",
-    borderRadius: 4,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    letterSpacing: -0.5,
-    marginBottom: 14,
-  },
+  progressPercent: { fontSize: 14 },
+  progressBar: { height: 6, borderRadius: 3, overflow: "hidden" },
+  progressFill: { height: "100%", borderRadius: 3 },
+  sectionTitle: { fontSize: 22, letterSpacing: -0.5, marginBottom: 14 },
   sessionCard: {
     flexDirection: "row",
     alignItems: "center",
     padding: 14,
-    borderRadius: 14,
-    marginBottom: 10,
+    borderRadius: 13,
+    marginBottom: 9,
     borderWidth: 1,
     gap: 12,
   },
   sessionCheck: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    borderWidth: 2,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 1.5,
     alignItems: "center",
     justifyContent: "center",
   },
   sessionInfo: { flex: 1 },
-  sessionSubject: { fontSize: 15, marginBottom: 3 },
-  sessionMeta: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
+  sessionSubject: { fontSize: 14, marginBottom: 3 },
+  sessionMeta: { flexDirection: "row", alignItems: "center", gap: 4 },
   sessionTime: { fontSize: 12 },
   sessionDurationBadge: {
     paddingHorizontal: 10,
     paddingVertical: 5,
-    borderRadius: 10,
+    borderRadius: 9,
+    borderWidth: 1,
   },
   sessionDurationText: { fontSize: 12 },
-  emptyState: {
-    alignItems: "center",
-    paddingVertical: 40,
-    gap: 12,
-  },
+  emptyState: { alignItems: "center", paddingVertical: 44, gap: 12 },
   emptyIcon: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
+    width: 68,
+    height: 68,
+    borderRadius: 34,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 4,
+    borderWidth: 1,
   },
-  emptyTitle: { fontSize: 18 },
+  emptyTitle: { fontSize: 17 },
   emptySubtitle: {
     fontSize: 14,
     textAlign: "center",
-    lineHeight: 20,
+    lineHeight: 21,
     paddingHorizontal: 20,
   },
 });

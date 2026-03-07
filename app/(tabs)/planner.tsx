@@ -10,8 +10,7 @@ import {
   Alert,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { LinearGradient } from "expo-linear-gradient";
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { Feather, Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import Animated, {
   useSharedValue,
@@ -23,7 +22,6 @@ import Animated, {
 } from "react-native-reanimated";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useStudy, StudyPlan, StudySession } from "@/contexts/StudyContext";
-import Colors from "@/constants/colors";
 
 const SUBJECT_SUGGESTIONS = [
   "Mathematics",
@@ -44,18 +42,16 @@ function SubjectTag({
   label,
   selected,
   onPress,
-  color,
 }: {
   label: string;
   selected: boolean;
   onPress: () => void;
-  color?: string;
 }) {
   const { colors } = useTheme();
   const scale = useSharedValue(1);
 
   const handlePress = () => {
-    scale.value = withSpring(0.92, { damping: 15 }, () => {
+    scale.value = withSpring(0.93, { damping: 15 }, () => {
       scale.value = withSpring(1);
     });
     Haptics.selectionAsync();
@@ -73,22 +69,17 @@ function SubjectTag({
         style={[
           styles.subjectTag,
           {
-            backgroundColor: selected
-              ? `${Colors.primary}20`
-              : colors.surface,
-            borderColor: selected ? Colors.primary : colors.cardBorder,
+            backgroundColor: selected ? colors.text : colors.surface,
+            borderColor: selected ? colors.text : colors.cardBorder,
           },
         ]}
       >
-        {selected && (
-          <Ionicons name="checkmark" size={12} color={Colors.primary} />
-        )}
         <Text
           style={[
             styles.subjectTagText,
             {
-              color: selected ? Colors.primary : colors.textSecondary,
-              fontFamily: selected ? "Inter_600SemiBold" : "Inter_400Regular",
+              color: selected ? colors.background : colors.textSecondary,
+              fontFamily: selected ? "Satoshi-Medium" : "Satoshi-Regular",
             },
           ]}
         >
@@ -99,68 +90,29 @@ function SubjectTag({
   );
 }
 
-function PlanSessionPreview({
-  session,
-  index,
-}: {
-  session: StudySession;
-  index: number;
-}) {
+function PlanSessionPreview({ session, index }: { session: StudySession; index: number }) {
   const { colors } = useTheme();
-  const COLORS = [
-    "#14B8A6",
-    "#8B5CF6",
-    "#F59E0B",
-    "#EF4444",
-    "#3B82F6",
-    "#10B981",
-    "#EC4899",
-  ];
-  const color = COLORS[index % COLORS.length];
+  const PALETTE = ["#888", "#777", "#999", "#666", "#aaa", "#555", "#bbb"];
+  const color = PALETTE[index % PALETTE.length];
 
   const durationText =
     session.duration >= 60
-      ? `${Math.floor(session.duration / 60)}h ${session.duration % 60 > 0 ? `${session.duration % 60}m` : ""}`
+      ? `${Math.floor(session.duration / 60)}h${session.duration % 60 > 0 ? ` ${session.duration % 60}m` : ""}`
       : `${session.duration}m`;
 
   return (
-    <View
-      style={[
-        styles.planSessionItem,
-        { backgroundColor: colors.surface, borderColor: colors.cardBorder },
-      ]}
-    >
-      <View style={[styles.planDot, { backgroundColor: color }]} />
+    <View style={[styles.planSessionItem, { backgroundColor: colors.surface, borderColor: colors.cardBorder }]}>
+      <View style={[styles.planDot, { backgroundColor: colors.textTertiary }]} />
       <View style={styles.planSessionInfo}>
-        <Text
-          style={[
-            styles.planSessionSubject,
-            { color: colors.text, fontFamily: "Inter_600SemiBold" },
-          ]}
-        >
+        <Text style={[styles.planSessionSubject, { color: colors.text, fontFamily: "Satoshi-Medium" }]}>
           {session.subject}
         </Text>
-        <Text
-          style={[
-            styles.planSessionTime,
-            { color: colors.textSecondary, fontFamily: "Inter_400Regular" },
-          ]}
-        >
+        <Text style={[styles.planSessionTime, { color: colors.textSecondary, fontFamily: "Satoshi-Regular" }]}>
           {session.startTime} · {durationText}
         </Text>
       </View>
-      <View
-        style={[
-          styles.planSessionBadge,
-          { backgroundColor: `${color}15` },
-        ]}
-      >
-        <Text
-          style={[
-            styles.planSessionBadgeText,
-            { color, fontFamily: "Inter_500Medium" },
-          ]}
-        >
+      <View style={[styles.planSessionBadge, { backgroundColor: colors.surfaceSecondary, borderColor: colors.cardBorder }]}>
+        <Text style={[styles.planSessionBadgeText, { color: colors.textSecondary, fontFamily: "Satoshi-Medium" }]}>
           {durationText}
         </Text>
       </View>
@@ -177,20 +129,17 @@ function generateStudyPlan(
 ): StudyPlan {
   const sessions: StudySession[] = [];
   const today = new Date();
-
-  const sessionsPerDay = Math.floor((dailyHours * 60) / sessionDuration);
-  const subjectRotation = [...subjects];
+  const sessionsPerDay = Math.max(1, Math.floor((dailyHours * 60) / sessionDuration));
 
   for (let day = 0; day < daysAhead; day++) {
     const date = new Date(today);
     date.setDate(date.getDate() + day);
     const dateStr = date.toISOString().split("T")[0];
-
     let hour = 9;
     let minute = 0;
 
     for (let i = 0; i < sessionsPerDay; i++) {
-      const subject = subjectRotation[(day * sessionsPerDay + i) % subjectRotation.length];
+      const subject = subjects[(day * sessionsPerDay + i) % subjects.length];
       const startTime = `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
 
       sessions.push({
@@ -220,7 +169,7 @@ function generateStudyPlan(
 }
 
 export default function PlannerScreen() {
-  const { colors, isDark } = useTheme();
+  const { colors } = useTheme();
   const { setActivePlan, activePlan } = useStudy();
   const insets = useSafeAreaInsets();
 
@@ -246,32 +195,25 @@ export default function PlannerScreen() {
   };
 
   const addCustomSubject = () => {
-    if (customSubject.trim() && !selectedSubjects.includes(customSubject.trim())) {
-      setSelectedSubjects((prev) => [...prev, customSubject.trim()]);
+    const trimmed = customSubject.trim();
+    if (trimmed && !selectedSubjects.includes(trimmed)) {
+      setSelectedSubjects((prev) => [...prev, trimmed]);
       setCustomSubject("");
     }
   };
 
   const handleGenerate = async () => {
     if (selectedSubjects.length === 0) {
-      Alert.alert("Add Subjects", "Please select at least one subject to study.");
+      Alert.alert("Select Subjects", "Please select at least one subject.");
       return;
     }
-
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     setIsGenerating(true);
     generateButtonScale.value = withSpring(0.96);
 
-    await new Promise((resolve) => setTimeout(resolve, 1400));
+    await new Promise((resolve) => setTimeout(resolve, 1200));
 
-    const plan = generateStudyPlan(
-      selectedSubjects,
-      goal || "Master selected subjects",
-      dailyHours,
-      sessionDuration,
-      daysAhead
-    );
-
+    const plan = generateStudyPlan(selectedSubjects, goal || "Master selected subjects", dailyHours, sessionDuration, daysAhead);
     setGeneratedPlan(plan);
     setIsGenerating(false);
     generateButtonScale.value = withSpring(1);
@@ -282,13 +224,11 @@ export default function PlannerScreen() {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     await setActivePlan(generatedPlan);
     setGeneratedPlan(null);
-    Alert.alert("Plan Applied!", "Your study plan is now active. Check the Today tab to see today's sessions.");
+    Alert.alert("Plan Applied", "Your study plan is now active. Check the Today tab.");
   };
 
   const todaySessions = generatedPlan
-    ? generatedPlan.sessions.filter(
-        (s) => s.date === new Date().toISOString().split("T")[0]
-      )
+    ? generatedPlan.sessions.filter((s) => s.date === new Date().toISOString().split("T")[0])
     : [];
 
   const generateBtnStyle = useAnimatedStyle(() => ({
@@ -306,160 +246,77 @@ export default function PlannerScreen() {
         ]}
       >
         {/* Header */}
-        <View style={styles.header}>
-          <View
-            style={[
-              styles.headerIcon,
-              { backgroundColor: `${Colors.primary}15` },
-            ]}
-          >
-            <MaterialCommunityIcons
-              name="brain"
-              size={20}
-              color={Colors.primary}
-            />
-          </View>
-          <View>
-            <Text
-              style={[
-                styles.headerTitle,
-                { color: colors.text, fontFamily: "Inter_700Bold" },
-              ]}
-            >
-              AI Planner
-            </Text>
-            <Text
-              style={[
-                styles.headerSubtitle,
-                { color: colors.textSecondary, fontFamily: "Inter_400Regular" },
-              ]}
-            >
-              Build your personalized study plan
-            </Text>
-          </View>
-        </View>
+        <Text style={[styles.pageTitle, { color: colors.text, fontFamily: "Satoshi-Black" }]}>
+          AI Planner
+        </Text>
+        <Text style={[styles.pageSubtitle, { color: colors.textSecondary, fontFamily: "Satoshi-Regular" }]}>
+          Build your personalized study schedule
+        </Text>
 
         {/* Active Plan Notice */}
         {activePlan && !generatedPlan && (
-          <View
-            style={[
-              styles.activePlanBanner,
-              {
-                backgroundColor: `${Colors.primary}10`,
-                borderColor: `${Colors.primary}30`,
-              },
-            ]}
-          >
-            <Ionicons name="checkmark-circle" size={16} color={Colors.primary} />
-            <Text
-              style={[
-                styles.activePlanText,
-                { color: Colors.primary, fontFamily: "Inter_500Medium" },
-              ]}
-            >
-              You have an active plan · {activePlan.subjects.join(", ")}
+          <View style={[styles.activePlanBanner, { backgroundColor: colors.surface, borderColor: colors.cardBorder }]}>
+            <Feather name="check-circle" size={14} color={colors.textSecondary} />
+            <Text style={[styles.activePlanText, { color: colors.textSecondary, fontFamily: "Satoshi-Regular" }]}>
+              Active plan · {activePlan.subjects.join(", ")}
             </Text>
           </View>
         )}
 
-        {/* Goal Input */}
+        {/* Goal */}
         <View style={styles.section}>
-          <Text
-            style={[
-              styles.sectionLabel,
-              { color: colors.text, fontFamily: "Inter_600SemiBold" },
-            ]}
-          >
+          <Text style={[styles.sectionLabel, { color: colors.text, fontFamily: "Satoshi-Bold" }]}>
             Your Goal
           </Text>
           <TextInput
             value={goal}
             onChangeText={setGoal}
-            placeholder="e.g. Prepare for final exams in 2 weeks"
+            placeholder="e.g. Prepare for finals in 2 weeks"
             placeholderTextColor={colors.textTertiary}
             style={[
               styles.textInput,
-              {
-                backgroundColor: colors.card,
-                borderColor: colors.cardBorder,
-                color: colors.text,
-                fontFamily: "Inter_400Regular",
-              },
+              { backgroundColor: colors.card, borderColor: colors.cardBorder, color: colors.text, fontFamily: "Satoshi-Regular" },
             ]}
             multiline
-            numberOfLines={2}
           />
         </View>
 
         {/* Subjects */}
         <View style={styles.section}>
-          <Text
-            style={[
-              styles.sectionLabel,
-              { color: colors.text, fontFamily: "Inter_600SemiBold" },
-            ]}
-          >
-            Subjects {selectedSubjects.length > 0 && `(${selectedSubjects.length})`}
+          <Text style={[styles.sectionLabel, { color: colors.text, fontFamily: "Satoshi-Bold" }]}>
+            Subjects {selectedSubjects.length > 0 ? `(${selectedSubjects.length})` : ""}
           </Text>
           <View style={styles.subjectTagsWrap}>
             {SUBJECT_SUGGESTIONS.map((s) => (
-              <SubjectTag
-                key={s}
-                label={s}
-                selected={selectedSubjects.includes(s)}
-                onPress={() => toggleSubject(s)}
-              />
+              <SubjectTag key={s} label={s} selected={selectedSubjects.includes(s)} onPress={() => toggleSubject(s)} />
+            ))}
+            {selectedSubjects.filter((s) => !SUBJECT_SUGGESTIONS.includes(s)).map((s) => (
+              <SubjectTag key={s} label={s} selected={true} onPress={() => toggleSubject(s)} />
             ))}
           </View>
-
-          {selectedSubjects.filter((s) => !SUBJECT_SUGGESTIONS.includes(s)).map((s) => (
-            <SubjectTag
-              key={s}
-              label={s}
-              selected={true}
-              onPress={() => toggleSubject(s)}
-            />
-          ))}
-
           <View style={styles.customInputRow}>
             <TextInput
               value={customSubject}
               onChangeText={setCustomSubject}
-              placeholder="Add custom subject..."
+              placeholder="Add subject..."
               placeholderTextColor={colors.textTertiary}
               style={[
                 styles.customInput,
-                {
-                  backgroundColor: colors.card,
-                  borderColor: colors.cardBorder,
-                  color: colors.text,
-                  fontFamily: "Inter_400Regular",
-                },
+                { backgroundColor: colors.card, borderColor: colors.cardBorder, color: colors.text, fontFamily: "Satoshi-Regular" },
               ]}
               onSubmitEditing={addCustomSubject}
               returnKeyType="done"
             />
-            <Pressable
-              onPress={addCustomSubject}
-              style={[
-                styles.addBtn,
-                { backgroundColor: Colors.primary },
-              ]}
-            >
-              <Ionicons name="add" size={20} color="#FFFFFF" />
+            <Pressable onPress={addCustomSubject} style={[styles.addBtn, { backgroundColor: colors.text }]}>
+              <Feather name="plus" size={20} color={colors.background} />
             </Pressable>
           </View>
         </View>
 
         {/* Daily Hours */}
         <View style={styles.section}>
-          <Text
-            style={[
-              styles.sectionLabel,
-              { color: colors.text, fontFamily: "Inter_600SemiBold" },
-            ]}
-          >
-            Daily Study Hours: {dailyHours}h
+          <Text style={[styles.sectionLabel, { color: colors.text, fontFamily: "Satoshi-Bold" }]}>
+            Daily Hours: {dailyHours}h
           </Text>
           <View style={styles.optionRow}>
             {[1, 2, 3, 4, 5, 6].map((h) => (
@@ -468,24 +325,10 @@ export default function PlannerScreen() {
                 onPress={() => { setDailyHours(h); Haptics.selectionAsync(); }}
                 style={[
                   styles.optionPill,
-                  {
-                    backgroundColor:
-                      dailyHours === h ? Colors.primary : colors.card,
-                    borderColor:
-                      dailyHours === h ? Colors.primary : colors.cardBorder,
-                  },
+                  { backgroundColor: dailyHours === h ? colors.text : colors.card, borderColor: dailyHours === h ? colors.text : colors.cardBorder },
                 ]}
               >
-                <Text
-                  style={[
-                    styles.optionPillText,
-                    {
-                      color: dailyHours === h ? "#FFFFFF" : colors.textSecondary,
-                      fontFamily:
-                        dailyHours === h ? "Inter_600SemiBold" : "Inter_400Regular",
-                    },
-                  ]}
-                >
+                <Text style={[styles.optionPillText, { color: dailyHours === h ? colors.background : colors.textSecondary, fontFamily: dailyHours === h ? "Satoshi-Bold" : "Satoshi-Regular" }]}>
                   {h}h
                 </Text>
               </Pressable>
@@ -495,13 +338,8 @@ export default function PlannerScreen() {
 
         {/* Session Duration */}
         <View style={styles.section}>
-          <Text
-            style={[
-              styles.sectionLabel,
-              { color: colors.text, fontFamily: "Inter_600SemiBold" },
-            ]}
-          >
-            Session Duration: {sessionDuration}m
+          <Text style={[styles.sectionLabel, { color: colors.text, fontFamily: "Satoshi-Bold" }]}>
+            Session Length: {sessionDuration}m
           </Text>
           <View style={styles.optionRow}>
             {DURATION_OPTIONS.map((d) => (
@@ -510,25 +348,10 @@ export default function PlannerScreen() {
                 onPress={() => { setSessionDuration(d); Haptics.selectionAsync(); }}
                 style={[
                   styles.optionPill,
-                  {
-                    backgroundColor:
-                      sessionDuration === d ? Colors.primary : colors.card,
-                    borderColor:
-                      sessionDuration === d ? Colors.primary : colors.cardBorder,
-                  },
+                  { backgroundColor: sessionDuration === d ? colors.text : colors.card, borderColor: sessionDuration === d ? colors.text : colors.cardBorder },
                 ]}
               >
-                <Text
-                  style={[
-                    styles.optionPillText,
-                    {
-                      color:
-                        sessionDuration === d ? "#FFFFFF" : colors.textSecondary,
-                      fontFamily:
-                        sessionDuration === d ? "Inter_600SemiBold" : "Inter_400Regular",
-                    },
-                  ]}
-                >
+                <Text style={[styles.optionPillText, { color: sessionDuration === d ? colors.background : colors.textSecondary, fontFamily: sessionDuration === d ? "Satoshi-Bold" : "Satoshi-Regular" }]}>
                   {d}m
                 </Text>
               </Pressable>
@@ -538,12 +361,7 @@ export default function PlannerScreen() {
 
         {/* Days Ahead */}
         <View style={styles.section}>
-          <Text
-            style={[
-              styles.sectionLabel,
-              { color: colors.text, fontFamily: "Inter_600SemiBold" },
-            ]}
-          >
+          <Text style={[styles.sectionLabel, { color: colors.text, fontFamily: "Satoshi-Bold" }]}>
             Plan Duration: {daysAhead} days
           </Text>
           <View style={styles.optionRow}>
@@ -553,24 +371,10 @@ export default function PlannerScreen() {
                 onPress={() => { setDaysAhead(d); Haptics.selectionAsync(); }}
                 style={[
                   styles.optionPill,
-                  {
-                    backgroundColor:
-                      daysAhead === d ? Colors.primary : colors.card,
-                    borderColor:
-                      daysAhead === d ? Colors.primary : colors.cardBorder,
-                  },
+                  { backgroundColor: daysAhead === d ? colors.text : colors.card, borderColor: daysAhead === d ? colors.text : colors.cardBorder },
                 ]}
               >
-                <Text
-                  style={[
-                    styles.optionPillText,
-                    {
-                      color: daysAhead === d ? "#FFFFFF" : colors.textSecondary,
-                      fontFamily:
-                        daysAhead === d ? "Inter_600SemiBold" : "Inter_400Regular",
-                    },
-                  ]}
-                >
+                <Text style={[styles.optionPillText, { color: daysAhead === d ? colors.background : colors.textSecondary, fontFamily: daysAhead === d ? "Satoshi-Bold" : "Satoshi-Regular" }]}>
                   {d}d
                 </Text>
               </Pressable>
@@ -580,179 +384,71 @@ export default function PlannerScreen() {
 
         {/* Generate Button */}
         <Animated.View style={generateBtnStyle}>
-          <Pressable onPress={handleGenerate} disabled={isGenerating}>
-            <LinearGradient
-              colors={["#14B8A6", "#0D9488"]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={[
-                styles.generateBtn,
-                { opacity: isGenerating ? 0.8 : 1 },
-              ]}
-            >
-              {isGenerating ? (
-                <>
-                  <MaterialCommunityIcons
-                    name="loading"
-                    size={20}
-                    color="#FFFFFF"
-                  />
-                  <Text
-                    style={[
-                      styles.generateBtnText,
-                      { fontFamily: "Inter_700Bold" },
-                    ]}
-                  >
-                    Generating Plan...
-                  </Text>
-                </>
-              ) : (
-                <>
-                  <MaterialCommunityIcons
-                    name="brain"
-                    size={20}
-                    color="#FFFFFF"
-                  />
-                  <Text
-                    style={[
-                      styles.generateBtnText,
-                      { fontFamily: "Inter_700Bold" },
-                    ]}
-                  >
-                    Generate Study Plan
-                  </Text>
-                </>
-              )}
-            </LinearGradient>
+          <Pressable
+            onPress={handleGenerate}
+            disabled={isGenerating}
+            style={[styles.generateBtn, { backgroundColor: colors.text, opacity: isGenerating ? 0.7 : 1 }]}
+          >
+            <Feather name={isGenerating ? "loader" : "cpu"} size={18} color={colors.background} />
+            <Text style={[styles.generateBtnText, { color: colors.background, fontFamily: "Satoshi-Bold" }]}>
+              {isGenerating ? "Generating..." : "Generate Study Plan"}
+            </Text>
           </Pressable>
         </Animated.View>
 
         {/* Generated Plan Preview */}
         {generatedPlan && (
-          <View
-            style={[
-              styles.planPreview,
-              { backgroundColor: colors.card, borderColor: colors.cardBorder },
-            ]}
-          >
-            <LinearGradient
-              colors={
-                isDark
-                  ? ["rgba(20,184,166,0.12)", "transparent"]
-                  : ["rgba(20,184,166,0.06)", "transparent"]
-              }
-              style={styles.planPreviewGradient}
-            >
-              <View style={styles.planPreviewHeader}>
-                <View>
-                  <Text
-                    style={[
-                      styles.planPreviewTitle,
-                      { color: colors.text, fontFamily: "Inter_700Bold" },
-                    ]}
-                  >
-                    Your Plan is Ready
-                  </Text>
-                  <Text
-                    style={[
-                      styles.planPreviewSubtitle,
-                      {
-                        color: colors.textSecondary,
-                        fontFamily: "Inter_400Regular",
-                      },
-                    ]}
-                  >
-                    {generatedPlan.sessions.length} sessions · {daysAhead} days
-                  </Text>
-                </View>
-                <View
-                  style={[
-                    styles.planReadyBadge,
-                    { backgroundColor: `${Colors.primary}15` },
-                  ]}
-                >
-                  <Ionicons name="sparkles" size={14} color={Colors.primary} />
-                  <Text
-                    style={[
-                      styles.planReadyText,
-                      { color: Colors.primary, fontFamily: "Inter_600SemiBold" },
-                    ]}
-                  >
-                    AI
-                  </Text>
-                </View>
-              </View>
-
-              <Text
-                style={[
-                  styles.planDayLabel,
-                  { color: colors.textSecondary, fontFamily: "Inter_500Medium" },
-                ]}
-              >
-                Today's sessions ({todaySessions.length})
-              </Text>
-
-              {todaySessions.length > 0 ? (
-                todaySessions.map((s, i) => (
-                  <PlanSessionPreview key={s.id} session={s} index={i} />
-                ))
-              ) : (
-                <Text
-                  style={[
-                    styles.noSessionsText,
-                    {
-                      color: colors.textTertiary,
-                      fontFamily: "Inter_400Regular",
-                    },
-                  ]}
-                >
-                  No sessions scheduled for today
+          <View style={[styles.planPreview, { backgroundColor: colors.card, borderColor: colors.cardBorder }]}>
+            <View style={styles.planPreviewHeader}>
+              <View>
+                <Text style={[styles.planPreviewTitle, { color: colors.text, fontFamily: "Satoshi-Bold" }]}>
+                  Plan Ready
                 </Text>
-              )}
-
-              <View style={styles.planActions}>
-                <Pressable
-                  onPress={() => setGeneratedPlan(null)}
-                  style={[
-                    styles.discardBtn,
-                    {
-                      borderColor: colors.cardBorder,
-                      backgroundColor: colors.surface,
-                    },
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.discardBtnText,
-                      {
-                        color: colors.textSecondary,
-                        fontFamily: "Inter_600SemiBold",
-                      },
-                    ]}
-                  >
-                    Discard
-                  </Text>
-                </Pressable>
-                <Pressable onPress={handleApplyPlan} style={styles.applyBtnWrap}>
-                  <LinearGradient
-                    colors={["#14B8A6", "#0D9488"]}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                    style={styles.applyBtn}
-                  >
-                    <Text
-                      style={[
-                        styles.applyBtnText,
-                        { fontFamily: "Inter_700Bold" },
-                      ]}
-                    >
-                      Apply Plan
-                    </Text>
-                    <Ionicons name="checkmark" size={18} color="#FFFFFF" />
-                  </LinearGradient>
-                </Pressable>
+                <Text style={[styles.planPreviewSubtitle, { color: colors.textSecondary, fontFamily: "Satoshi-Regular" }]}>
+                  {generatedPlan.sessions.length} sessions · {daysAhead} days
+                </Text>
               </View>
-            </LinearGradient>
+              <View style={[styles.planReadyBadge, { backgroundColor: colors.surface, borderColor: colors.cardBorder }]}>
+                <Feather name="cpu" size={12} color={colors.textSecondary} />
+                <Text style={[styles.planReadyText, { color: colors.textSecondary, fontFamily: "Satoshi-Medium" }]}>
+                  AI
+                </Text>
+              </View>
+            </View>
+
+            <Text style={[styles.planDayLabel, { color: colors.textSecondary, fontFamily: "Satoshi-Medium" }]}>
+              Today's sessions ({todaySessions.length})
+            </Text>
+
+            {todaySessions.length > 0 ? (
+              todaySessions.map((s, i) => (
+                <PlanSessionPreview key={s.id} session={s} index={i} />
+              ))
+            ) : (
+              <Text style={[styles.noSessionsText, { color: colors.textTertiary, fontFamily: "Satoshi-Regular" }]}>
+                No sessions scheduled for today
+              </Text>
+            )}
+
+            <View style={styles.planActions}>
+              <Pressable
+                onPress={() => setGeneratedPlan(null)}
+                style={[styles.discardBtn, { borderColor: colors.cardBorder, backgroundColor: colors.surface }]}
+              >
+                <Text style={[styles.discardBtnText, { color: colors.textSecondary, fontFamily: "Satoshi-Medium" }]}>
+                  Discard
+                </Text>
+              </Pressable>
+              <Pressable
+                onPress={handleApplyPlan}
+                style={[styles.applyBtn, { backgroundColor: colors.text, flex: 2 }]}
+              >
+                <Text style={[styles.applyBtnText, { color: colors.background, fontFamily: "Satoshi-Bold" }]}>
+                  Apply Plan
+                </Text>
+                <Feather name="check" size={16} color={colors.background} />
+              </Pressable>
+            </View>
           </View>
         )}
       </ScrollView>
@@ -762,22 +458,9 @@ export default function PlannerScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  scrollContent: { paddingHorizontal: 20 },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 14,
-    marginBottom: 20,
-  },
-  headerIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 14,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  headerTitle: { fontSize: 24, letterSpacing: -0.5 },
-  headerSubtitle: { fontSize: 13, marginTop: 1 },
+  scrollContent: { paddingHorizontal: 22 },
+  pageTitle: { fontSize: 28, letterSpacing: -0.8, marginBottom: 4 },
+  pageSubtitle: { fontSize: 14, marginBottom: 22 },
   activePlanBanner: {
     flexDirection: "row",
     alignItems: "center",
@@ -785,39 +468,27 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 12,
     borderWidth: 1,
-    marginBottom: 20,
+    marginBottom: 22,
   },
   activePlanText: { fontSize: 13, flex: 1 },
   section: { marginBottom: 22 },
   sectionLabel: { fontSize: 15, marginBottom: 10 },
   textInput: {
     borderWidth: 1,
-    borderRadius: 14,
+    borderRadius: 13,
     padding: 14,
     fontSize: 14,
     minHeight: 52,
   },
-  subjectTagsWrap: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-    marginBottom: 8,
-  },
+  subjectTagsWrap: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginBottom: 10 },
   subjectTag: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 5,
-    paddingHorizontal: 12,
+    paddingHorizontal: 13,
     paddingVertical: 7,
     borderRadius: 20,
     borderWidth: 1,
   },
   subjectTagText: { fontSize: 13 },
-  customInputRow: {
-    flexDirection: "row",
-    gap: 8,
-    marginTop: 8,
-  },
+  customInputRow: { flexDirection: "row", gap: 8 },
   customInput: {
     flex: 1,
     borderWidth: 1,
@@ -833,11 +504,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  optionRow: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-  },
+  optionRow: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   optionPill: {
     paddingHorizontal: 16,
     paddingVertical: 8,
@@ -851,23 +518,18 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 10,
     paddingVertical: 17,
-    borderRadius: 16,
+    borderRadius: 14,
     marginBottom: 20,
   },
-  generateBtnText: { color: "#FFFFFF", fontSize: 17 },
-  planPreview: {
-    borderRadius: 20,
-    borderWidth: 1,
-    overflow: "hidden",
-  },
-  planPreviewGradient: { padding: 20 },
+  generateBtnText: { fontSize: 16 },
+  planPreview: { borderRadius: 18, borderWidth: 1, padding: 18 },
   planPreviewHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-start",
     marginBottom: 16,
   },
-  planPreviewTitle: { fontSize: 18, marginBottom: 3 },
+  planPreviewTitle: { fontSize: 17, marginBottom: 3 },
   planPreviewSubtitle: { fontSize: 13 },
   planReadyBadge: {
     flexDirection: "row",
@@ -876,6 +538,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: 20,
+    borderWidth: 1,
   },
   planReadyText: { fontSize: 12 },
   planDayLabel: { fontSize: 13, marginBottom: 10 },
@@ -883,39 +546,34 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     padding: 12,
-    borderRadius: 12,
+    borderRadius: 11,
     marginBottom: 8,
     borderWidth: 1,
     gap: 10,
   },
-  planDot: { width: 8, height: 8, borderRadius: 4 },
+  planDot: { width: 7, height: 7, borderRadius: 4 },
   planSessionInfo: { flex: 1 },
   planSessionSubject: { fontSize: 14, marginBottom: 2 },
   planSessionTime: { fontSize: 12 },
-  planSessionBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10 },
+  planSessionBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8, borderWidth: 1 },
   planSessionBadgeText: { fontSize: 12 },
   noSessionsText: { fontSize: 13, textAlign: "center", paddingVertical: 8 },
-  planActions: {
-    flexDirection: "row",
-    gap: 10,
-    marginTop: 16,
-  },
+  planActions: { flexDirection: "row", gap: 10, marginTop: 16 },
   discardBtn: {
     flex: 1,
     paddingVertical: 14,
-    borderRadius: 14,
+    borderRadius: 13,
     borderWidth: 1,
     alignItems: "center",
   },
-  discardBtnText: { fontSize: 15 },
-  applyBtnWrap: { flex: 2 },
+  discardBtnText: { fontSize: 14 },
   applyBtn: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
     paddingVertical: 14,
-    borderRadius: 14,
+    borderRadius: 13,
   },
-  applyBtnText: { color: "#FFFFFF", fontSize: 15 },
+  applyBtnText: { fontSize: 14 },
 });

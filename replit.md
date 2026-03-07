@@ -22,12 +22,18 @@ A mobile app built with Expo (React Native) and Express backend.
 - `contexts/ThemeContext.tsx` — Light/Dark/System theme with AsyncStorage persistence
 - `contexts/StudyContext.tsx` — Study sessions, plans, streak, weekly stats
 
+## Typography
+
+- Font: Satoshi (Regular, Medium, Bold, Black, Light)
+- Loaded via local TTF files in `assets/fonts/`
+- Loaded with expo-font in `_layout.tsx`
+
 ## Color Palette
 
-- Primary: `#14B8A6` (teal)
-- Accent: `#00D4AA`
-- Dark BG: `#0A0E1A`
-- Light BG: `#F0F4F8`
+- Dark mode: Background `#141414`, Cards `#1E1E1E`, Text `#F0F0F0`
+- Light mode: Background `#F5F5F5`, Cards `#FFFFFF`, Text `#111111`
+- Accent: `colors.text` (white in dark, near-black in light) — monochrome design
+- Destructive: `#CC3333` / `#E05252`
 
 ## Key Features
 
