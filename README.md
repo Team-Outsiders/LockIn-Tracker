@@ -1,4 +1,4 @@
-<img width="100%" src="https://github.com/Team-Outsiders/LockIn-Tracker/blob/web/assets/Lock%20In%20banner.png">
+<img width="100%" src="https://github.com/Team-Outsiders/LockIn-Tracker/blob/web/assets/Lock%20In%20banner-r.jpg">
 
 # Lock In - AI Personalized Study Tracker
 The AI Personalized Study Tracker is a web application designed to help students create customized study plans. Using AI, the system dynamically adjusts schedules based on difficulty levels, available time, upcoming exams, and completed or missed tasks. The goal is to improve learning efficiency, reduce stress, and help students stay consistent with their studies.
@@ -11,7 +11,7 @@ The AI Personalized Study Tracker is a web application designed to help students
 > and can be extended or deployed on other platforms for production use.
 
 <b> Scan the QR code from your mobile in expo app to preview the mobile application.</b>
-<img width="100%" src="https://github.com/Team-Outsiders/LockIn-Tracker/blob/web/assets/mob%20scan.png">
+<img width="100%" src="https://github.com/Team-Outsiders/LockIn-Tracker/blob/web/assets/mob%20scan-q.png">
 
 >[!IMPORTANT]
 > The web application is developed using Gemini Studio to complement the mobile version. <br>
