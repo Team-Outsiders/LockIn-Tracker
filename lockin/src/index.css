@@ -1,0 +1,28 @@
+@import url('https://api.fontshare.com/v2/css?f[]=satoshi@900,700,500,300,400&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Satoshi", ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+  *, ::after, ::before {
+    @apply transition-colors duration-300;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    @apply bg-white text-zinc-900 antialiased;
+  }
+
+  .dark body {
+    @apply bg-zinc-950 text-zinc-100;
+  }
+}
+
+/* Custom dark mode utility for Tailwind 4 if needed, 
+   though dark: usually works out of the box with .dark class in many setups.
+   We'll ensure it's smooth. */
+html {
+  scroll-behavior: smooth;
+}
