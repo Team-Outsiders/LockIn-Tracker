@@ -14,12 +14,12 @@ The AI Personalized Study Tracker is a web application designed to help students
 <img width="100%" src="https://github.com/Team-Outsiders/LockIn-Tracker/blob/web/assets/mob%20scan-q.png">
 
 >[!IMPORTANT]
-> The web application is developed using Gemini Studio to complement the mobile version. <br>
-> It provides a full-featured interface for managing personalized study plans, <br>
-> visualizing progress, and accessing dashboards and settings from any browser. <br>
-> The web version emphasizes accessibility and ease of use, making the AI-powered study tracker <br>
-> available across devices and supporting seamless learning management.<br>
-> <b>The project is available in branch "web" : https://github.com/Team-Outsiders/LockIn-Tracker/tree/web </b>
+<b>The web application is developed using Gemini Studio to complement the mobile version. <br>
+It provides a full-featured interface for managing personalized study plans, <br>
+visualizing progress, and accessing dashboards and settings from any browser. <br>
+The web version emphasizes accessibility and ease of use, making the AI-powered study tracker <br>
+available across devices and supporting seamless learning management.<br>
+The project is available in branch "web" : https://github.com/Team-Outsiders/LockIn-Tracker/tree/web </b>
 
 ### Real-World Problem in EdTech
 Many students struggle with managing their study time effectively. Standard study schedules often fail to account for:
